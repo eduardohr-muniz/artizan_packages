@@ -210,13 +210,13 @@ void main() {
               description: 'Validation error',
               buildResponse: (ctx) {
                 ctx.add(
-                  const {
+                  response: const {
                     'error': {'code': 'missing_q', 'message': 'q is required'}
                   },
                   name: 'missing_q',
                   summary: 'Missing query',
                 ).add(
-                  const {
+                  response: const {
                     'error': {'code': 'q_too_short', 'message': 'q too short'}
                   },
                   name: 'q_too_short',

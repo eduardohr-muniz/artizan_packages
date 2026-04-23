@@ -123,7 +123,7 @@ final v1ProductsApiDoc = Api.path()
             schema: $apiErrorResponseSchema,
             description: 'Invalid query parameters',
             buildResponse: (response) => response.add(
-              const {
+              response: const {
                 'code': 'invalid_query',
                 'message': 'minPrice must be less than or equal to maxPrice',
                 'details': ['minPrice=200, maxPrice=100'],
@@ -131,7 +131,7 @@ final v1ProductsApiDoc = Api.path()
               name: 'invalid_query',
               summary: 'Invalid query parameters',
             ).add(
-              const {
+              response: const {
                 'code': 'invalid_query',
                 'message': 'sort must be one of: name, price',
                 'details': ['sort=createdAt'],
@@ -145,7 +145,7 @@ final v1ProductsApiDoc = Api.path()
             schema: $apiErrorResponseSchema,
             description: 'Unauthorized',
             buildResponse: (ctx) => ctx.add(
-              const {
+              response: const {
                 'code': 'unauthorized',
                 'message': 'Authorization header is required',
                 'details': ['Use: Authorization: Bearer <token>'],
@@ -187,7 +187,7 @@ final v1ProductsApiDoc = Api.path()
             description: 'Validation error (zto)',
             buildResponse: (ctx) {
               ctx.add(
-                {
+                response: {
                   'issues': [
                     {
                       'path': ['name'],
@@ -198,7 +198,7 @@ final v1ProductsApiDoc = Api.path()
                 name: 'invalid_name',
                 summary: 'Name too short',
               ).add(
-                {
+                response: {
                   'issues': [
                     {
                       'path': ['price'],

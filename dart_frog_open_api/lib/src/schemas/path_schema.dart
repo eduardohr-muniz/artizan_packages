@@ -223,35 +223,35 @@ class ResponseExampleContext {
 
   List<Object?> get items => List.unmodifiable(_items);
 
-  ResponseExampleContext add(
-    Object? example, {
+  ResponseExampleContext add({
+    required Object? response,
     String? name,
     String? summary,
     String? description,
   }) {
-    if (example == null) return this;
-    if (name != null && example is! OpenApiResponseExample) {
-      if (example is Map<String, dynamic>) {
+    if (response == null) return this;
+    if (name != null && response is! OpenApiResponseExample) {
+      if (response is Map<String, dynamic>) {
         _items.add(
           OpenApiResponseExample(
             name: name,
             summary: summary,
             description: description,
-            value: example,
+            value: response,
           ),
         );
         return this;
       }
-      _items.add(example);
+      _items.add(response);
       return this;
     }
-    _items.add(example);
+    _items.add(response);
     return this;
   }
 
   ResponseExampleContext addAll(Iterable<Object?> examples) {
     for (final e in examples) {
-      add(e);
+      add(response: e);
     }
     return this;
   }
