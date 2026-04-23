@@ -1,0 +1,21 @@
+{
+  "roots": [
+    "test_enum"
+  ],
+  "packages": [
+    {
+      "name": "test_enum",
+      "version": "0.0.0",
+      "dependencies": [
+        "zto"
+      ],
+      "devDependencies": []
+    },
+    {
+      "name": "zto",
+      "version": "0.1.0",
+      "dependencies": []
+    }
+  ],
+  "configVersion": 1
+}

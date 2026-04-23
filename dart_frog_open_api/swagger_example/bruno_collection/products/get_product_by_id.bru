@@ -1,0 +1,29 @@
+meta {
+  name: Get product by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/products/:id
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Product name | Yes |
+  | `price` | number | Price in USD | Yes |
+  | `sku` | string? | - | No |
+}

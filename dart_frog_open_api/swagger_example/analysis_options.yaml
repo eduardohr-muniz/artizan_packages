@@ -1,0 +1,6 @@
+include: ../../back_lint.yaml
+
+# analyzer:
+#   exclude:
+#     - build/**
+#     - "**/*.g.dart"

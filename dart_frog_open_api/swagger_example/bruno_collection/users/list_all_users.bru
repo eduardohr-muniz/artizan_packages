@@ -1,0 +1,53 @@
+meta {
+  name: List all users
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/users
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+docs {
+  ## List Users
+  
+  Returns the **full list** of registered users in the system.
+  
+  ### Behavior
+  - Results are returned in **insertion order** (newest last).
+  - This endpoint is **public** — no authentication required.
+  - An empty array `[]` is returned when no users exist yet.
+  
+  ### Response fields
+  
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `id` | `string` | Unique identifier (UUID v4) |
+  | `name` | `string` | Full display name |
+  | `email` | `string` | Validated e-mail address |
+  | `createdAt` | `string` | ISO 8601 creation timestamp |
+  
+  ### Example response
+  
+  ```json
+  {
+    "data": [{ "id": "a1b2c3d4-...", "name": "Ada Lovelace", "email": "ada@example.com" }],
+    "total": 1
+  }
+  ```
+  
+  > **Note:** This endpoint returns **in-memory data** and resets on every server restart.
+  
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `data` | array of any | User items | Yes |
+  | `total` | integer | Total number of users | Yes |
+  | `address` | any | Address items | Yes |
+}

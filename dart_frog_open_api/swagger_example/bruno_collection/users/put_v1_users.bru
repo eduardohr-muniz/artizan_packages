@@ -1,0 +1,19 @@
+meta {
+  name: PUT /v1/users
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/v1/users
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}

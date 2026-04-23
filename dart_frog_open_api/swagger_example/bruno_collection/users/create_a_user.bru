@@ -1,0 +1,78 @@
+meta {
+  name: Create a user
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/v1/users
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Alice Silva",
+    "email": "alice@example.com",
+    "role": "admin"
+  }
+}
+
+docs {
+  ## Create User
+  
+  Creates a new user account and returns the persisted resource.
+  
+  ### Validation rules
+  - `name` — required, minimum **2 characters**.
+  - `email` — required, must be a **valid e-mail address**.
+  - `age` — optional, must be **≥ 18** when provided.
+  
+  ### Error handling
+  On invalid input the server responds with **422 Unprocessable Content**
+  and a structured error body listing every field that failed validation.
+  
+  ```json
+  { "issues": [{ "field": "email", "message": "Invalid email address" }] }
+  ```
+  
+  ### Request body schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `name` | string? | - | No |
+  | `email` | string | E-mail address | Yes |
+  | `role` | enum: admin, editor, viewer | User role | Yes |
+  
+  ### Response 201 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Full name | Yes |
+  | `username` | string? | - | No |
+  | `email` | string | E-mail address | Yes |
+  | `role` | enum: admin, editor, viewer | - | Yes |
+  | `created_at` | string (ISO 8601) | Creation timestamp | Yes |
+  | `meta_data` | object | Metadata do usuario | Yes |
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  test("Status is 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("Response has user id", function() {
+    expect(body).to.have.property("id");
+  });
+
+  if (body.id) {
+    bru.setEnvVar("userId", body.id);
+  }
+}

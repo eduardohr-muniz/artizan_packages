@@ -1,0 +1,43 @@
+meta {
+  name: List all products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/products
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  ## List Products
+  
+  Returns the inventory of available products.
+  
+  ### Pricing
+  - Prices are in **USD**.
+  - Use `minPrice` and `maxPrice` to find products in a specific budget.
+  
+  ### Security
+  This endpoint requires **either** a Bearer token **or** an API Key.
+  
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `data` | array of any | Product items | Yes |
+  | `total` | integer | Total number of products | Yes |
+}
+
+script:post-response {
+  test("Status is 200 OK", () => expect(res.getStatus()).to.equal(200));
+  test("Data is an array", () => expect(res.getBody().data).to.be.an("array"));
+}

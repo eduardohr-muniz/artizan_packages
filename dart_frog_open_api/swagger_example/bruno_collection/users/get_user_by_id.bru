@@ -1,0 +1,24 @@
+meta {
+  name: Get user by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/users/:id
+  auth: none
+}
+
+docs {
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Full name | Yes |
+  | `username` | string? | - | No |
+  | `email` | string | E-mail address | Yes |
+  | `role` | enum: admin, editor, viewer | - | Yes |
+  | `created_at` | string (ISO 8601) | Creation timestamp | Yes |
+  | `meta_data` | object | Metadata do usuario | Yes |
+}

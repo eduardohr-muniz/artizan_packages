@@ -1,0 +1,20 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "zto",
+      "rootUri": "../../",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "test_enum",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    }
+  ],
+  "generator": "pub",
+  "generatorVersion": "3.11.3",
+  "pubCache": "file:///Users/eduardomuniz/.puro/shared/pub_cache"
+}

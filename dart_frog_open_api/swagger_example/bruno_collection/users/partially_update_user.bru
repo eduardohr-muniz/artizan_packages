@@ -1,0 +1,69 @@
+meta {
+  name: Partially update user
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/v1/users/:id
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Alice Silva",
+    "email": "alice@example.com"
+  }
+}
+
+docs {
+  ## Partial Update User
+  
+  Updates only the fields provided in the request body — body is **optional**.
+  Sending an empty body (or omitting it entirely) is valid and returns the current state.
+  
+  ### Patchable fields
+  - `name` — new display name
+  - `email` — new e-mail address (must be valid)
+  
+  ### Example — update only the name
+  ```json
+  { "name": "Alice Wonderland" }
+  ```
+  
+  ### Request body schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `name` | string? | - | No |
+  | `email` | string? | - | No |
+  
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Full name | Yes |
+  | `username` | string? | - | No |
+  | `email` | string | E-mail address | Yes |
+  | `role` | enum: admin, editor, viewer | - | Yes |
+  | `created_at` | string (ISO 8601) | Creation timestamp | Yes |
+  | `meta_data` | object | Metadata do usuario | Yes |
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  test("Status is 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response has user id", function() {
+    expect(body).to.have.property("id");
+  });
+}

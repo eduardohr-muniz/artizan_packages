@@ -1,0 +1,7 @@
+builders:
+  zto_generator:
+    import: "package:zto_generator/zto_generator.dart"
+    builder_factories: ["ztoBuilder"]
+    build_extensions: { ".dart": [".g.dart"] }
+    auto_apply: dependents
+    build_to: source

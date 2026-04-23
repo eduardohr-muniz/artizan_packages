@@ -1,0 +1,60 @@
+meta {
+  name: Create a product
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/v1/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+headers {
+  Content-Type: application/json
+  X-API-Key: {{apiKey}}
+}
+
+body:json {
+  {
+    "name": "Widget Pro",
+    "price": 29.99,
+    "sku": "WGT-001"
+  }
+}
+
+docs {
+  ## Create Product
+  
+  Adds a new item to the catalog.
+  
+  ### Requirements
+  - **Admin/Editor** role required (enforced via middleware).
+  - `price` must be **> 1.0**.
+  - `sku` must be **unique**.
+  
+  ### Request body schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `name` | string | Product name | Yes |
+  | `price` | number | Price in USD | Yes |
+  | `sku` | string? | - | No |
+  
+  ### Response 201 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Product name | Yes |
+  | `price` | number | Price in USD | Yes |
+  | `sku` | string? | - | No |
+}
+
+script:post-response {
+  test("Status is 201 Created", () => expect(res.getStatus()).to.equal(201));
+}

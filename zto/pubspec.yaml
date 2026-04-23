@@ -1,0 +1,17 @@
+name: zto
+description: Annotation-based DTO validation and OpenAPI schema generation for
+  Dart server-side.
+version: 0.1.0
+publish_to: none
+
+repository: https://github.com/artizan-paipfood/back
+homepage: https://github.com/artizan-paipfood/back/tree/main/packages/zto
+documentation: https://github.com/artizan-paipfood/back/blob/main/packages/zto/README.md
+issue_tracker: https://github.com/artizan-paipfood/back/issues
+
+environment:
+  sdk: ^3.6.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0

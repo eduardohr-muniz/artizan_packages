@@ -1,0 +1,43 @@
+meta {
+  name: Replace user
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/v1/users/:id
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Alice Silva",
+    "email": "alice@example.com"
+  }
+}
+
+docs {
+  ### Request body schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `name` | string? | - | No |
+  | `email` | string? | - | No |
+  
+  ### Response 200 schema
+  
+  | Field | Type | Description | Required |
+  |-------|------|-------------|----------|
+  | `id` | string | Unique identifier | Yes |
+  | `name` | string | Full name | Yes |
+  | `username` | string? | - | No |
+  | `email` | string | E-mail address | Yes |
+  | `role` | enum: admin, editor, viewer | - | Yes |
+  | `created_at` | string (ISO 8601) | Creation timestamp | Yes |
+  | `meta_data` | object | Metadata do usuario | Yes |
+}
