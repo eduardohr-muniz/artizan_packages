@@ -4,6 +4,10 @@ import '../schemas/open_api_schema.dart';
 import '../schemas/path_schema.dart';
 import 'param_type.dart';
 
+typedef BuildResponseExamples = Object? Function(
+  ResponseExampleContext response,
+);
+
 /// Entry point for the Fluent API to build OpenAPI documentation schemas.
 abstract class Api {
   const Api._();
@@ -22,8 +26,7 @@ class ApiPathBuilder {
   OperationSchema? _delete;
 
   /// Defines a path parameter (e.g., `{id}`).
-  ApiPathBuilder param(String name, ParamType type,
-      {String? description, Object? example}) {
+  ApiPathBuilder param(String name, ParamType type, {String? description, Object? example}) {
     _pathParameters[name] = ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -63,8 +66,7 @@ class ApiPathBuilder {
     return this;
   }
 
-  OperationSchema _buildOperation(
-      void Function(OperationBuilder op) configure) {
+  OperationSchema _buildOperation(void Function(OperationBuilder op) configure) {
     final builder = OperationBuilder();
     configure(builder);
     return builder.build();
@@ -96,6 +98,7 @@ class OperationBuilder {
   final Map<int, OpenApiSchema?> _responseSchemas = {};
   final Map<int, List<ResponseHeaderSchema>> _responseHeaders = {};
   final Map<int, String> _responseDescriptions = {};
+  final Map<int, Map<String, Map<String, dynamic>>> _responseExamples = {};
   final List<ParameterSchema> _queryParameters = [];
   final List<ParameterSchema> _headerParameters = [];
   String? _postmanTestScript;
@@ -157,8 +160,7 @@ class OperationBuilder {
   }
 
   /// Adds a query parameter to this operation.
-  OperationBuilder query(String name, ParamType type,
-      {String? description, Object? example, List<String>? values}) {
+  OperationBuilder query(String name, ParamType type, {String? description, Object? example, List<String>? values}) {
     _queryParameters.add(ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -170,8 +172,7 @@ class OperationBuilder {
   }
 
   /// Adds a header parameter to this operation.
-  OperationBuilder header(String name, ParamType type,
-      {String? description, String? format, Object? example}) {
+  OperationBuilder header(String name, ParamType type, {String? description, String? format, Object? example}) {
     _headerParameters.add(ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -183,8 +184,7 @@ class OperationBuilder {
   }
 
   /// Configures the request body using a Zto schema.
-  OperationBuilder body(ZtoSchema schema,
-      {bool required = true, String contentType = 'application/json'}) {
+  OperationBuilder body(ZtoSchema schema, {bool required = true, String contentType = 'application/json'}) {
     _requestBodySchema = OpenApiSchema.fromZto(schema);
     _requestBodyRequired = required;
     _requestContentType = contentType;
@@ -192,8 +192,7 @@ class OperationBuilder {
   }
 
   /// Configures a response for a specific HTTP status code.
-  OperationBuilder returns(int status,
-      {ZtoSchema? schema, String? description}) {
+  OperationBuilder returns(int status, {ZtoSchema? schema, String? description, BuildResponseExamples? buildResponse}) {
     if (schema != null) {
       _responseSchemas[status] = OpenApiSchema.fromZto(schema);
     } else {
@@ -202,12 +201,67 @@ class OperationBuilder {
     if (description != null) {
       _responseDescriptions[status] = description;
     }
+    if (buildResponse != null) {
+      final context = ResponseExampleContext(
+        status: status,
+        description: description,
+        schemaTypeName: schema?.typeName,
+      );
+      final produced = buildResponse(context);
+      final values = <Object?>[
+        ...context.items,
+      ];
+      if (produced is List) {
+        values.addAll(produced);
+      } else if (produced != null) {
+        values.add(produced);
+      }
+      _responseExamples[status] = _normalizeExamples(values);
+    }
     return this;
   }
 
+  Map<String, Map<String, dynamic>> _normalizeExamples(List<Object?> values) {
+    final out = <String, Map<String, dynamic>>{};
+    var i = 1;
+    for (final item in values) {
+      if (item == null) continue;
+      if (item is OpenApiResponseExample) {
+        out[item.name] = item.toOpenApiMap();
+        continue;
+      }
+      if (item is Map<String, dynamic>) {
+        out['example_$i'] = {'value': item};
+        i++;
+        continue;
+      }
+      final map = _tryToMap(item);
+      if (map != null) {
+        out['example_$i'] = {'value': map};
+        i++;
+      }
+    }
+    return out;
+  }
+
+  Map<String, dynamic>? _tryToMap(Object item) {
+    try {
+      final dynamic dyn = item;
+      final result = dyn.toMap();
+      if (result is Map<String, dynamic>) return result;
+      if (result is Map) {
+        return result.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
   /// Adds a response header for a specific HTTP status code.
-  OperationBuilder responseHeader(int status, String name, ParamType type,
-      {String? description, Object? example}) {
+  OperationBuilder responseHeader(int status, String name, ParamType type, {String? description, Object? example}) {
     _responseHeaders.putIfAbsent(status, () => []);
     _responseHeaders[status]!.add(ResponseHeaderSchema(
       name: name,
@@ -256,6 +310,7 @@ class OperationBuilder {
       responseSchemas: _responseSchemas,
       responseHeaders: _responseHeaders,
       responseDescriptions: _responseDescriptions,
+      responseExamples: _responseExamples,
       queryParameters: _queryParameters,
       headerParameters: _headerParameters,
       postmanTestScript: _postmanTestScript,

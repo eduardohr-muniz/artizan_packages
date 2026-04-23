@@ -333,6 +333,7 @@ class OpenApiBuilder {
       // Determine description: custom override → default
       final description = operationSchema.responseDescriptions[code] ??
           _statusDescription(code);
+      final examples = operationSchema.responseExamples[code];
 
       // Determine response headers for this status code
       final headers = operationSchema.responseHeaders[code];
@@ -344,14 +345,16 @@ class OpenApiBuilder {
       }
 
       if (responseSchema != null) {
+        final mediaType = <String, dynamic>{
+          'schema': {
+            r'$ref': '#/components/schemas/${responseSchema.typeName}'
+          },
+          if (examples != null && examples.isNotEmpty) 'examples': examples,
+        };
         responses[codeStr] = {
           'description': description,
           'content': {
-            'application/json': {
-              'schema': {
-                r'$ref': '#/components/schemas/${responseSchema.typeName}'
-              },
-            },
+            'application/json': mediaType,
           },
           if (headersMap != null) 'headers': headersMap,
         };

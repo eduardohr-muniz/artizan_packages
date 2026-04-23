@@ -135,10 +135,7 @@ const $schemaName = ZtoSchema(
     // Fallback to annotation for backward compatibility
     return field.metadata.any((m) {
       final source = m.toSource();
-      return source == '@ZNullable()' ||
-          source == '@ZNullable' ||
-          source == '@Nullable()' ||
-          source == '@Nullable';
+      return source == '@ZNullable()' || source == '@ZNullable' || source == '@Nullable()' || source == '@Nullable';
     });
   }
 

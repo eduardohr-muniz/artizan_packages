@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import '../../lib/dart_frog_open_api.dart';
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
+
+import '../../lib/dart_frog_open_api.dart';
 
 // ── Schemas (mirrors what zto_generator would produce) ──────────────────────
 
@@ -73,8 +74,6 @@ Directory _fakeRoutes() {
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 void main() {
-
-
   group('OpenApiBuilder with zto DTO schemas', () {
     test(r'requestBody uses $ref to components/schemas', () {
       final spec = OpenApiBuilder(
@@ -160,6 +159,86 @@ void main() {
 
       final schema = responses['200']['content']['application/json']['schema'] as Map;
       expect(schema[r'$ref'], '#/components/schemas/ProductResponseDto');
+    });
+
+    test('returns(buildExamples) serializes DTO examples to OpenAPI examples', () {
+      final path = Api.path()
+          .get(
+            (op) => op.returns(
+              400,
+              schema: $productResponseDtoSchema,
+              description: 'Validation error',
+              buildResponse: (ctx) {
+                expect(ctx.status, 400);
+                return const [
+                  OpenApiResponseExample(
+                    name: 'missing_name',
+                    summary: 'Missing name',
+                    value: {
+                      'error': {'code': 'invalid_request', 'message': 'name is required'}
+                    },
+                  ),
+                  {
+                    'error': {'code': 'invalid_request', 'message': 'price must be > 0'}
+                  },
+                ];
+              },
+            ),
+          )
+          .build();
+
+      final spec = OpenApiBuilder(
+        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        pathSchemas: {'/': path},
+      ).build();
+
+      final get = spec['paths']['/']['get'] as Map;
+      final responses = get['responses'] as Map;
+      final content = responses['400']['content']['application/json'] as Map;
+      final examples = content['examples'] as Map;
+      expect(examples.containsKey('missing_name'), isTrue);
+      expect(examples.containsKey('example_1'), isTrue);
+      expect(examples['missing_name']['value']['error']['code'], 'invalid_request');
+    });
+
+    test('returns(buildExamples) supports ctx.add().add() fluent style', () {
+      final path = Api.path()
+          .get(
+            (op) => op.returns(
+              400,
+              schema: $productResponseDtoSchema,
+              description: 'Validation error',
+              buildResponse: (ctx) {
+                ctx.add(
+                  const {
+                    'error': {'code': 'missing_q', 'message': 'q is required'}
+                  },
+                  name: 'missing_q',
+                  summary: 'Missing query',
+                ).add(
+                  const {
+                    'error': {'code': 'q_too_short', 'message': 'q too short'}
+                  },
+                  name: 'q_too_short',
+                );
+                return null;
+              },
+            ),
+          )
+          .build();
+
+      final spec = OpenApiBuilder(
+        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        pathSchemas: {'/': path},
+      ).build();
+
+      final get = spec['paths']['/']['get'] as Map;
+      final responses = get['responses'] as Map;
+      final content = responses['400']['content']['application/json'] as Map;
+      final examples = content['examples'] as Map;
+      expect(examples.containsKey('missing_q'), isTrue);
+      expect(examples.containsKey('q_too_short'), isTrue);
+      expect(examples['missing_q']['summary'], 'Missing query');
     });
 
     test('components/schemas contains response DTO schema', () {

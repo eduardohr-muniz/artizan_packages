@@ -74,6 +74,7 @@ class OperationSchema {
     this.responseSchemas = const {},
     this.responseHeaders = const {},
     this.responseDescriptions = const {},
+    this.responseExamples = const {},
     this.queryParameters = const [],
     this.headerParameters = const [],
     this.postmanTestScript,
@@ -148,6 +149,12 @@ class OperationSchema {
   /// ```
   final Map<int, String> responseDescriptions;
 
+  /// Named examples for response body per HTTP status code.
+  ///
+  /// OpenAPI target:
+  /// `responses[status].content['application/json'].examples`.
+  final Map<int, Map<String, Map<String, dynamic>>> responseExamples;
+
   /// Query parameters for this operation.
   ///
   /// Each [ParameterSchema] becomes a `in: query` parameter in the OpenAPI spec.
@@ -198,6 +205,79 @@ class OperationSchema {
 
   /// Custom OpenAPI extensions (keys starting with `x-`).
   final Map<String, dynamic> extensions;
+}
+
+/// Context passed to `buildExamples` callback in fluent API.
+class ResponseExampleContext {
+  ResponseExampleContext({
+    required this.status,
+    this.description,
+    this.schemaTypeName,
+  });
+
+  final int status;
+  final String? description;
+  final String? schemaTypeName;
+
+  final List<Object?> _items = [];
+
+  List<Object?> get items => List.unmodifiable(_items);
+
+  ResponseExampleContext add(
+    Object? example, {
+    String? name,
+    String? summary,
+    String? description,
+  }) {
+    if (example == null) return this;
+    if (name != null && example is! OpenApiResponseExample) {
+      if (example is Map<String, dynamic>) {
+        _items.add(
+          OpenApiResponseExample(
+            name: name,
+            summary: summary,
+            description: description,
+            value: example,
+          ),
+        );
+        return this;
+      }
+      _items.add(example);
+      return this;
+    }
+    _items.add(example);
+    return this;
+  }
+
+  ResponseExampleContext addAll(Iterable<Object?> examples) {
+    for (final e in examples) {
+      add(e);
+    }
+    return this;
+  }
+}
+
+/// Structured response example for OpenAPI docs.
+class OpenApiResponseExample {
+  const OpenApiResponseExample({
+    required this.name,
+    required this.value,
+    this.summary,
+    this.description,
+  });
+
+  final String name;
+  final Map<String, dynamic> value;
+  final String? summary;
+  final String? description;
+
+  Map<String, dynamic> toOpenApiMap() {
+    return {
+      if (summary != null) 'summary': summary,
+      if (description != null) 'description': description,
+      'value': value,
+    };
+  }
 }
 
 /// Describes [OperationSchema] per HTTP method for a single API path.

@@ -5,6 +5,7 @@ import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:swagger_example/dtos/product_dto.dart';
 import 'package:swagger_example/response.dart';
 import 'package:swagger_example/store.dart';
+import 'package:zto/zto.dart';
 
 import '../../../open_api/security_refs.dart';
 
@@ -45,6 +46,40 @@ test("Status is 200 OK", () => expect(res.getStatus()).to.equal(200));
 test("Data is an array", () => expect(res.getBody().data).to.be.an("array"));
 ''';
 
+const $apiErrorResponseSchema = ZtoSchema(
+  typeName: 'ApiErrorResponseDto',
+  descriptors: [
+    FieldDescriptor(
+      fieldAnnotation: ZString(
+        mapKey: 'code',
+        description: 'Error code',
+        example: 'unauthorized',
+      ),
+      validators: [],
+      isNullable: false,
+    ),
+    FieldDescriptor(
+      fieldAnnotation: ZString(
+        mapKey: 'message',
+        description: 'Error message',
+        example: 'Unauthorized',
+      ),
+      validators: [],
+      isNullable: false,
+    ),
+    FieldDescriptor(
+      fieldAnnotation: ZList(
+        mapKey: 'details',
+        itemType: ZString,
+        description: 'Optional error details',
+        example: ['Authorization header is missing'],
+      ),
+      validators: [],
+      isNullable: false,
+    ),
+  ],
+);
+
 const _createProductPostmanScript = '''
 pm.test("Status is 201 Created", () => pm.response.to.have.status(201));
 ''';
@@ -83,6 +118,42 @@ final v1ProductsApiDoc = Api.path()
             200,
             schema: $ProductListResponseDtoSchema,
           )
+          .returns(
+            400,
+            schema: $apiErrorResponseSchema,
+            description: 'Invalid query parameters',
+            buildResponse: (response) => response.add(
+              const {
+                'code': 'invalid_query',
+                'message': 'minPrice must be less than or equal to maxPrice',
+                'details': ['minPrice=200, maxPrice=100'],
+              },
+              name: 'invalid_query',
+              summary: 'Invalid query parameters',
+            ).add(
+              const {
+                'code': 'invalid_query',
+                'message': 'sort must be one of: name, price',
+                'details': ['sort=createdAt'],
+              },
+              name: 'invalid_sort',
+              summary: 'Sort not supported',
+            ),
+          )
+          .returns(
+            401,
+            schema: $apiErrorResponseSchema,
+            description: 'Unauthorized',
+            buildResponse: (ctx) => ctx.add(
+              const {
+                'code': 'unauthorized',
+                'message': 'Authorization header is required',
+                'details': ['Use: Authorization: Bearer <token>'],
+              },
+              name: 'missing_bearer',
+              summary: 'Bearer token missing',
+            ),
+          )
           .responseHeader(
             200,
             'X-Total-Count',
@@ -110,6 +181,36 @@ final v1ProductsApiDoc = Api.path()
             201,
             schema: $ProductResponseDtoSchema,
             description: 'Product created — see Location header',
+          )
+          .returns(
+            422,
+            description: 'Validation error (zto)',
+            buildResponse: (ctx) {
+              ctx.add(
+                {
+                  'issues': [
+                    {
+                      'path': ['name'],
+                      'message': 'name must have at least 2 characters'
+                    }
+                  ]
+                },
+                name: 'invalid_name',
+                summary: 'Name too short',
+              ).add(
+                {
+                  'issues': [
+                    {
+                      'path': ['price'],
+                      'message': 'Price must be greater than 1.0'
+                    }
+                  ]
+                },
+                name: 'invalid_price',
+                summary: 'Price below minimum',
+              );
+              return null;
+            },
           )
           .responseHeader(
             201,
