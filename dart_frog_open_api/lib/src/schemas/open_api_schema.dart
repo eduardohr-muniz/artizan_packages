@@ -32,4 +32,14 @@ class OpenApiSchema {
         jsonSchema: DtoToOpenApi.convert(zto),
         ztoSchema: zto,
       );
+
+  /// Creates an array schema wrapping a [ZtoSchema] item type.
+  factory OpenApiSchema.arrayOf(ZtoSchema itemSchema) => OpenApiSchema(
+        typeName: '${itemSchema.typeName}List',
+        jsonSchema: {
+          'type': 'array',
+          'items': {r'$ref': '#/components/schemas/${itemSchema.typeName}'},
+        },
+        ztoSchema: itemSchema,
+      );
 }

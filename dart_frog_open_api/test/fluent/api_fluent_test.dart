@@ -1,5 +1,13 @@
 import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:test/test.dart';
+import 'package:zto/zto.dart';
+
+const _itemSchema = ZtoSchema(
+  typeName: 'ItemDto',
+  descriptors: [
+    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
+  ],
+);
 
 void main() {
   group('Api Fluent Builder', () {
@@ -32,6 +40,31 @@ void main() {
       expect(pathSchema.post!.summary, equals('Create item'));
       expect(pathSchema.post!.responseDescriptions[201], equals('Created item'));
       expect(pathSchema.put, isNull);
+    });
+
+    test('returnsListOf sets array responseSchema and description', () {
+      final pathSchema = Api.path()
+          .get((op) => op
+              .summary('List items')
+              .returnsListOf(200, _itemSchema, description: 'Lista de itens'))
+          .build();
+
+      final op = pathSchema.get!;
+      expect(op.responseDescriptions[200], equals('Lista de itens'));
+
+      final schema = op.responseSchemas[200]!;
+      expect(schema.typeName, equals('ItemDtoList'));
+      expect(schema.jsonSchema['type'], equals('array'));
+      final items = schema.jsonSchema['items'] as Map<String, dynamic>;
+      expect(items[r'$ref'], equals('#/components/schemas/ItemDto'));
+    });
+
+    test('returnsListOf without description leaves responseDescriptions empty', () {
+      final pathSchema = Api.path()
+          .get((op) => op.summary('X').returnsListOf(200, _itemSchema))
+          .build();
+
+      expect(pathSchema.get!.responseDescriptions.containsKey(200), isFalse);
     });
 
     test('builds PathSchema with path parameters', () {

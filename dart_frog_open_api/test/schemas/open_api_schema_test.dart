@@ -19,6 +19,29 @@ const _testZtoSchema = ZtoSchema(
 );
 
 void main() {
+  group('OpenApiSchema.arrayOf', () {
+    test('typeName is itemTypeName + List', () {
+      final schema = OpenApiSchema.arrayOf(_testZtoSchema);
+      expect(schema.typeName, equals('TestDtoList'));
+    });
+
+    test('jsonSchema is type: array', () {
+      final schema = OpenApiSchema.arrayOf(_testZtoSchema);
+      expect(schema.jsonSchema['type'], equals('array'));
+    });
+
+    test(r'items uses $ref pointing to item typeName', () {
+      final schema = OpenApiSchema.arrayOf(_testZtoSchema);
+      final items = schema.jsonSchema['items'] as Map<String, dynamic>;
+      expect(items[r'$ref'], equals('#/components/schemas/TestDto'));
+    });
+
+    test('ztoSchema holds the item schema for nested discovery', () {
+      final schema = OpenApiSchema.arrayOf(_testZtoSchema);
+      expect(schema.ztoSchema, equals(_testZtoSchema));
+    });
+  });
+
   group('OpenApiSchema', () {
     test('has typeName and jsonSchema', () {
       const schema = OpenApiSchema(

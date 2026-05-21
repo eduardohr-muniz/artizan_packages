@@ -191,6 +191,13 @@ class OperationBuilder {
     return this;
   }
 
+  /// Configures a list/array response for a specific HTTP status code.
+  OperationBuilder returnsListOf(int status, ZtoSchema itemSchema, {String? description}) {
+    _responseSchemas[status] = OpenApiSchema.arrayOf(itemSchema);
+    if (description != null) _responseDescriptions[status] = description;
+    return this;
+  }
+
   /// Configures a response for a specific HTTP status code.
   OperationBuilder returns(int status, {ZtoSchema? schema, String? description, BuildResponseExamples? buildResponse}) {
     if (schema != null) {
