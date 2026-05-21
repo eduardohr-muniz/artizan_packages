@@ -1,5 +1,22 @@
+import 'dart:convert';
+
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
+
+// ── Enums used in tests ──────────────────────────────────────────────────────
+
+// Plain enum — simplest case.
+enum _SimpleRole { admin, viewer }
+
+// Enhanced enum with fields — mirrors AppLocaleCode, the real bug trigger.
+enum _LocaleCode {
+  BR(currency: 'BRL', symbol: r'R$'),
+  GB(currency: 'GBP', symbol: '£');
+
+  const _LocaleCode({required this.currency, required this.symbol});
+  final String currency;
+  final String symbol;
+}
 
 // ── Schemas (mirrors what zto_generator would produce) ──────────────────────
 
@@ -157,6 +174,44 @@ void main() {
       test('ZEnum -> type: string with enum values', () {
         expect(props['role']['type'], 'string');
         expect(props['role']['enum'], ['admin', 'viewer']);
+      });
+
+      test('ZEnum with plain Dart enum emits name strings', () {
+        final schema = DtoToOpenApi.convert(
+          const ZtoSchema(
+            typeName: 'RoleDto',
+            descriptors: [
+              FieldDescriptor(
+                fieldAnnotation: ZEnum(mapKey: 'role', values: _SimpleRole.values),
+                validators: [],
+                isNullable: false,
+              ),
+            ],
+          ),
+        );
+        final enumValues = (schema['properties'] as Map)['role']['enum'] as List;
+        expect(enumValues, ['admin', 'viewer']);
+        expect(enumValues.every((e) => e is String), isTrue);
+      });
+
+      test('ZEnum with enhanced Dart enum (with fields) emits name strings and is JSON-serializable', () {
+        final schema = DtoToOpenApi.convert(
+          const ZtoSchema(
+            typeName: 'LocaleDto',
+            descriptors: [
+              FieldDescriptor(
+                fieldAnnotation: ZEnum(mapKey: 'locale', values: _LocaleCode.values),
+                validators: [],
+                isNullable: false,
+              ),
+            ],
+          ),
+        );
+        final enumValues = (schema['properties'] as Map)['locale']['enum'] as List;
+        expect(enumValues, ['BR', 'GB']);
+        expect(enumValues.every((e) => e is String), isTrue);
+        // Must be JSON-encodable (was the original bug).
+        expect(() => jsonEncode(schema), returnsNormally);
       });
 
       test('ZList -> type: array', () {

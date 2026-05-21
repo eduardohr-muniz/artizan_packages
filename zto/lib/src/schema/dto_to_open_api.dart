@@ -136,7 +136,7 @@ abstract final class DtoToOpenApi {
       ZBool() => {'type': 'boolean'},
       ZDate() => {'type': 'string', 'format': 'date-time'},
       ZFile() => {'type': 'string', 'format': 'binary'},
-      ZEnum(:final values) => {'type': 'string', 'enum': values},
+      ZEnum(:final values) => {'type': 'string', 'enum': values.map((e) => e.toString().split('.').last).toList()},
       ZList(:final itemType) => {
           'type': 'array',
           'items': _itemSchema(itemType),
