@@ -171,6 +171,21 @@ class OperationBuilder {
     return this;
   }
 
+  /// Adds a string query parameter with optional [required] flag.
+  ///
+  /// Shorthand for [query] when the type is always `string` and `required`
+  /// matters (e.g. `.queryParam('user_id', required: true)`).
+  OperationBuilder queryParam(String name, {String? description, bool required = false, Object? example}) {
+    _queryParameters.add(ParameterSchema(
+      name: name,
+      type: ParamType.string.openApiName,
+      description: description,
+      required: required,
+      example: example,
+    ));
+    return this;
+  }
+
   /// Adds a header parameter to this operation.
   OperationBuilder header(String name, ParamType type, {String? description, String? format, Object? example}) {
     _headerParameters.add(ParameterSchema(

@@ -67,6 +67,61 @@ void main() {
       expect(pathSchema.get!.responseDescriptions.containsKey(200), isFalse);
     });
 
+    group('queryParam', () {
+      test('adds a required string query parameter', () {
+        final pathSchema = Api.path()
+            .get(
+              (op) => op
+                  .summary('Get me')
+                  .queryParam('user_id', description: 'ID do usuário', required: true),
+            )
+            .build();
+
+        final params = pathSchema.get!.queryParameters;
+        expect(params.length, equals(1));
+        expect(params.first.name, equals('user_id'));
+        expect(params.first.type, equals('string'));
+        expect(params.first.required, isTrue);
+        expect(params.first.description, equals('ID do usuário'));
+      });
+
+      test('defaults required to false', () {
+        final pathSchema = Api.path()
+            .get((op) => op.summary('X').queryParam('filter'))
+            .build();
+
+        expect(pathSchema.get!.queryParameters.first.required, isFalse);
+      });
+
+      test('accepts optional example', () {
+        final pathSchema = Api.path()
+            .get(
+              (op) => op
+                  .summary('X')
+                  .queryParam('page', example: '1'),
+            )
+            .build();
+
+        expect(pathSchema.get!.queryParameters.first.example, equals('1'));
+      });
+
+      test('can chain multiple queryParam calls', () {
+        final pathSchema = Api.path()
+            .get(
+              (op) => op
+                  .summary('X')
+                  .queryParam('user_id', required: true)
+                  .queryParam('include_deleted'),
+            )
+            .build();
+
+        final params = pathSchema.get!.queryParameters;
+        expect(params.length, equals(2));
+        expect(params[0].name, equals('user_id'));
+        expect(params[1].name, equals('include_deleted'));
+      });
+    });
+
     test('builds PathSchema with path parameters', () {
       final pathSchema = Api.path()
           .param('id', ParamType.string, description: 'ID param')
