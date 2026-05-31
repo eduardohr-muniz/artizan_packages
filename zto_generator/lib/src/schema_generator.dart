@@ -38,13 +38,13 @@ const $schemaName = ZtoSchema(
 
 // ── ParseType helpers ──────────────────────────────────────────────────────
 
-/// Reads the [ParseType] from the class-level @ZDto / @ZEntity annotation.
+/// Reads the [ParseType] from the class-level @ZDto / @ZEntity / @ZModel annotation.
 ParseType _getParseType(ClassElement classElement) {
   for (final meta in classElement.metadata) {
     final obj = meta.computeConstantValue();
     if (obj == null) continue;
     final typeName = obj.type?.element?.name;
-    if (typeName != 'ZDto' && typeName != 'ZEntity') continue;
+    if (typeName != 'ZDto' && typeName != 'ZEntity' && typeName != 'ZModel') continue;
 
     final parseTypeObj = obj.getField('parseType');
     if (parseTypeObj == null) continue;

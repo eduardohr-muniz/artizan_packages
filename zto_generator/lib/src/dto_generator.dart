@@ -16,6 +16,7 @@ Builder ztoBuilder(BuilderOptions options) => PartBuilder(
         const DtoGenerator(),
         const ZDtoGenerator(),
         const ZEntityGenerator(),
+        const ZModelGenerator(),
         const ZtoDtosGenerator(),
         const ZtoGenerateSchemasGenerator(),
       ],
@@ -186,6 +187,26 @@ class ZEntityGenerator extends GeneratorForAnnotation<ZEntity> {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         '@ZEntity can only be applied to classes.',
+        element: element,
+      );
+    }
+    return generateSchemaForClass(element);
+  }
+}
+
+/// Generates a `ZtoSchema` constant for every class annotated with `@ZModel()`.
+class ZModelGenerator extends GeneratorForAnnotation<ZModel> {
+  const ZModelGenerator();
+
+  @override
+  String generateForAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+        '@ZModel can only be applied to classes.',
         element: element,
       );
     }

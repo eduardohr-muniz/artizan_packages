@@ -386,6 +386,24 @@ class ZEntity {
   final bool deprecated;
 }
 
+/// Marks a class as a Zto Model — a persistable representation of a data aggregate
+/// (not necessarily a database table). Semantically equivalent to [ZEntity]/[ZDto]:
+/// it generates the same `ZtoSchema`. Use [ZModel] for persistable aggregates,
+/// [ZEntity] for domain entities with business rules, and [ZDto] for transport contracts.
+///
+/// Example:
+/// ```dart
+/// @ZModel(description: 'User model', parseType: ParseType.snakeCase)
+/// class UserModel with ZtoDto<UserModel> { ... }
+/// ```
+class ZModel {
+  const ZModel({required this.description, this.parseType = ParseType.camelCase, this.deprecated = false});
+
+  final String description;
+  final ParseType parseType;
+  final bool deprecated;
+}
+
 /// @deprecated Use [@ZDto] instead.
 @Deprecated('Use @ZDto()')
 class Dto {

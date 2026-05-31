@@ -249,6 +249,13 @@ class ZEntity {
   final bool deprecated;
 }
 
+class ZModel {
+  const ZModel({required this.description, this.parseType = ParseType.camelCase, this.deprecated = false});
+  final String description;
+  final ParseType parseType;
+  final bool deprecated;
+}
+
 class ZtoDtos {
   const ZtoDtos({required this.dtos});
   final List<Type> dtos;
@@ -822,6 +829,146 @@ class UserDto {
           'pkg|lib/user_dto.g.dart': decodedMatches(allOf([
             contains("mapKey: 'custom_key'"),
             contains("mapKey: 'created_at'"),
+          ])),
+        },
+      );
+    });
+  });
+
+  group('@ZModel', () {
+    test('gera \$XModelSchema (ZtoSchema) para uma classe anotada com @ZModel', () async {
+      await testBuilder(
+        ztoBuilder(BuilderOptions.empty),
+        {
+          ..._zdtoSources(),
+          'pkg|lib/user_model.dart': r'''
+import 'package:zto/zto.dart';
+
+part 'user_model.g.dart';
+
+@ZModel(description: 'User model')
+class UserModel {
+  @ZString(description: 'User id')
+  final String userId;
+
+  @ZDate(description: 'Created at')
+  final DateTime createdAt;
+
+  @ZString()
+  @ZNullable()
+  final String? lastName;
+
+  const UserModel({required this.userId, required this.createdAt, this.lastName});
+}
+''',
+        },
+        outputs: {
+          'pkg|lib/user_model.g.dart': decodedMatches(allOf([
+            contains(r'const $UserModelSchema = ZtoSchema('),
+            contains("typeName: 'UserModel'"),
+            contains("mapKey: 'userId'"),
+            contains("mapKey: 'createdAt'"),
+            contains("mapKey: 'lastName'"),
+            contains('isNullable: true'),
+            contains('isNullable: false'),
+          ])),
+        },
+      );
+    });
+
+    test('schema gerado por @ZModel é idêntico ao gerado por @ZEntity para a mesma classe', () async {
+      // Ambas as anotações delegam a generateSchemaForClass, logo produzem o
+      // mesmo ZtoSchema (typeName + descriptors) para a mesma classe.
+      const modelSource = r'''
+import 'package:zto/zto.dart';
+
+part 'sample.g.dart';
+
+@ZModel(description: 'Sample')
+class Sample {
+  @ZString(description: 'The name')
+  final String name;
+
+  @ZInt()
+  @ZNullable()
+  final int? age;
+
+  const Sample({required this.name, this.age});
+}
+''';
+
+      const entitySource = r'''
+import 'package:zto/zto.dart';
+
+part 'sample.g.dart';
+
+@ZEntity(description: 'Sample')
+class Sample {
+  @ZString(description: 'The name')
+  final String name;
+
+  @ZInt()
+  @ZNullable()
+  final int? age;
+
+  const Sample({required this.name, this.age});
+}
+''';
+
+      final commonMatchers = allOf([
+        contains(r'const $SampleSchema = ZtoSchema('),
+        contains("typeName: 'Sample'"),
+        contains("mapKey: 'name'"),
+        contains("description: 'The name'"),
+        contains("mapKey: 'age'"),
+        contains('isNullable: true'),
+        contains('isNullable: false'),
+      ]);
+
+      await testBuilder(
+        ztoBuilder(BuilderOptions.empty),
+        {..._zdtoSources(), 'pkg|lib/sample.dart': modelSource},
+        outputs: {'pkg|lib/sample.g.dart': decodedMatches(commonMatchers)},
+      );
+
+      await testBuilder(
+        ztoBuilder(BuilderOptions.empty),
+        {..._zdtoSources(), 'pkg|lib/sample.dart': entitySource},
+        outputs: {'pkg|lib/sample.g.dart': decodedMatches(commonMatchers)},
+      );
+    });
+
+    test('@ZModel com ParseType.snakeCase converte camelCase em snake_case nos mapKeys', () async {
+      // Espelho de tabela usa colunas snake_case: garante que @ZModel honra o
+      // parseType exatamente como @ZEntity/@ZDto (trava o fix em _getParseType).
+      await testBuilder(
+        ztoBuilder(BuilderOptions.empty),
+        {
+          ..._zdtoSources(),
+          'pkg|lib/product_model.dart': r'''
+import 'package:zto/zto.dart';
+
+part 'product_model.g.dart';
+
+@ZModel(description: 'Product model', parseType: ParseType.snakeCase)
+class ProductModel {
+  @ZString(description: 'Establishment id')
+  final String establishmentId;
+
+  @ZDate(description: 'Created at')
+  final DateTime createdAt;
+
+  const ProductModel({required this.establishmentId, required this.createdAt});
+}
+''',
+        },
+        outputs: {
+          'pkg|lib/product_model.g.dart': decodedMatches(allOf([
+            contains(r'const $ProductModelSchema = ZtoSchema('),
+            contains("mapKey: 'establishment_id'"),
+            contains("mapKey: 'created_at'"),
+            isNot(contains("mapKey: 'establishmentId'")),
+            isNot(contains("mapKey: 'createdAt'")),
           ])),
         },
       );
