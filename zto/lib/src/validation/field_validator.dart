@@ -106,7 +106,7 @@ abstract final class FieldValidator {
       ZBool() => value is bool,
       ZDate() => value is String || value is DateTime,
       ZFile() => true,
-      ZEnum(:final values) => value is String && values.contains(value),
+      ZEnum(:final values) => value is String && values.map(_enumValueName).contains(value),
       ZList() => value is List,
       ZListOf() => value is List,
       ZObj() => value is Map,
@@ -124,7 +124,7 @@ abstract final class FieldValidator {
       ZNum() => '"$key" must be a number (got ${value.runtimeType})',
       ZBool() => '"$key" must be a boolean (got ${value.runtimeType})',
       ZDate() => '"$key" must be a date-time (got ${value.runtimeType})',
-      ZEnum(:final values) => '"$key" must be one of [${values.join(', ')}] (got ${value.runtimeType})',
+      ZEnum(:final values) => '"$key" must be one of [${values.map(_enumValueName).join(', ')}] (got ${value.runtimeType})',
       ZList() => '"$key" must be an array (got ${value.runtimeType})',
       ZListOf() => '"$key" must be an array (got ${value.runtimeType})',
       ZObj() => '"$key" must be an object (got ${value.runtimeType})',
@@ -138,6 +138,11 @@ abstract final class FieldValidator {
       field: key,
     );
   }
+
+  /// Normaliza um valor permitido de `@ZEnum` para a forma serializada:
+  /// enums do Dart serializam via `.name` (ex.: `DeliveryMethod.polygon` → `polygon`);
+  /// valores já em `String` (ex.: `@ZEnum(values: ['admin', 'editor'])`) passam direto.
+  static String _enumValueName(Object? value) => value is Enum ? value.name : '$value';
 
   static ZtoIssue? _runValidator(ZtoValidator v, dynamic value, String key) {
     return switch (v) {

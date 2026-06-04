@@ -1,6 +1,8 @@
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
+enum _DeliveryMethod { polygon, miles }
+
 FieldDescriptor _descriptor(
   ZtoField field, {
   List<ZtoValidator> validators = const [],
@@ -77,6 +79,25 @@ void main() {
         final issues = FieldValidator.validate(d, 'superuser');
         expect(issues, hasLength(1));
         expect(issues.first.field, 'role');
+      });
+
+      test('ZEnum aceita o .name quando values é um enum nativo', () {
+        final d = _descriptor(const ZEnum(mapKey: 'delivery_method', values: _DeliveryMethod.values));
+        expect(FieldValidator.validate(d, 'polygon'), isEmpty);
+      });
+
+      test('ZEnum rejeita valor fora do enum nativo', () {
+        final d = _descriptor(const ZEnum(mapKey: 'delivery_method', values: _DeliveryMethod.values));
+        final issues = FieldValidator.validate(d, 'walking');
+        expect(issues, hasLength(1));
+        expect(issues.first.field, 'delivery_method');
+      });
+
+      test('ZEnum monta a mensagem com .name (não o toString do enum)', () {
+        final d = _descriptor(const ZEnum(mapKey: 'delivery_method', values: _DeliveryMethod.values));
+        final issues = FieldValidator.validate(d, 'walking');
+        expect(issues.first.message, contains('[polygon, miles]'));
+        expect(issues.first.message, isNot(contains('_DeliveryMethod.')));
       });
     });
 
