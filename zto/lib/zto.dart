@@ -25,6 +25,7 @@ export 'src/annotations/validator_annotations.dart';
 export 'src/core/zto_dto.dart';
 export 'src/core/zto_exception.dart'; // exports ZtoIssue, ZtoException, Zto
 export 'src/core/zto_issue.dart';
+export 'src/core/zto_refine.dart';
 export 'src/core/zto_schema.dart';
 export 'src/fluent/z_singleton.dart';
 export 'src/fluent/zto_map.dart';
