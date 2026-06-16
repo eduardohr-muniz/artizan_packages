@@ -82,12 +82,17 @@ FutureOr<Response> onRequest(RequestContext context) =>
 ```yaml
 # pubspec.yaml
 dependencies:
-  dart_frog_open_api:
-    path: ../dart_frog_open_api   # ajuste conforme seu monorepo
+  dart_frog: ^1.1.0
+  dart_frog_open_api: ^0.1.0
+  zto: ^0.1.0                 # schemas de DTO
+
+dev_dependencies:
+  build_runner: ^2.4.0
+  zto_generator: ^0.1.0      # gera os schemas
 ```
 
 > O pacote depende do [Zto](https://pub.dev/packages/zto) para geração de schemas de DTO.
-> Adicione-o também se ainda não estiver no projeto.
+> Adicione `zto` + `zto_generator` ao projeto se ainda não estiverem lá.
 
 ---
 

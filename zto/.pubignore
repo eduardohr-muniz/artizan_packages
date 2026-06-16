@@ -1,0 +1,12 @@
+# Build / tool artifacts (some are tracked in git but must not be published)
+.dart_tool/
+build/
+.dart_frog/
+coverage/
+*.snapshot
+*.dill
+pubspec.lock
+.DS_Store
+
+# Internal scratch
+test_enum/

@@ -2,7 +2,17 @@ name: zto_generator
 description: build_runner code generator for zto — generates ZtoSchema constants
   and validated fromMap functions from @Dto-annotated classes.
 version: 0.1.0
-publish_to: none
+
+repository: https://github.com/eduardohr-muniz/artizan_packages
+homepage: https://github.com/eduardohr-muniz/artizan_packages/tree/main/zto_generator
+documentation: https://github.com/eduardohr-muniz/artizan_packages/blob/main/zto_generator/README.md
+issue_tracker: https://github.com/eduardohr-muniz/artizan_packages/issues
+
+topics:
+  - codegen
+  - build-runner
+  - validation
+  - dto
 
 environment:
   sdk: ^3.6.0
@@ -11,8 +21,7 @@ dependencies:
   analyzer: ^7.0.0
   build: ^2.4.0
   source_gen: ^2.0.0
-  zto:
-    path: ../zto
+  zto: ^0.1.0
 
 dev_dependencies:
   build_runner_core: ^9.1.0

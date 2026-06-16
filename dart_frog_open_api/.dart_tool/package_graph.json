@@ -18,6 +18,11 @@
       ]
     },
     {
+      "name": "zto",
+      "version": "0.1.0",
+      "dependencies": []
+    },
+    {
       "name": "test",
       "version": "1.31.0",
       "dependencies": [
@@ -60,11 +65,6 @@
     {
       "name": "lints",
       "version": "6.1.0",
-      "dependencies": []
-    },
-    {
-      "name": "zto",
-      "version": "0.1.0",
       "dependencies": []
     },
     {

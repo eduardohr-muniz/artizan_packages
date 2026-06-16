@@ -2,7 +2,17 @@ name: dart_frog_open_api
 description: OpenAPI/Swagger spec generator for Dart Frog — file-system based
   route scanning.
 version: 0.1.0
-publish_to: none
+
+repository: https://github.com/eduardohr-muniz/artizan_packages
+homepage: https://github.com/eduardohr-muniz/artizan_packages/tree/main/dart_frog_open_api
+documentation: https://github.com/eduardohr-muniz/artizan_packages/blob/main/dart_frog_open_api/README.md
+issue_tracker: https://github.com/eduardohr-muniz/artizan_packages/issues
+
+topics:
+  - dart-frog
+  - openapi
+  - swagger
+  - documentation
 
 environment:
   sdk: ^3.6.0
@@ -10,8 +20,7 @@ environment:
 dependencies:
   archive: ^4.0.0
   dart_frog: ^1.1.0
-  zto:
-    path: ../zto
+  zto: ^0.1.0
 
 dev_dependencies:
   lints: ^6.0.0

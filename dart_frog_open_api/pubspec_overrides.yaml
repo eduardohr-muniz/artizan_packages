@@ -1,0 +1,6 @@
+# Local monorepo linking. Ignored by `dart pub publish`.
+# Keeps the hosted `zto: ^0.1.0` constraint in pubspec.yaml while
+# resolving against the local source during development.
+dependency_overrides:
+  zto:
+    path: ../zto

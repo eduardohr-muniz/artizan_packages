@@ -20,6 +20,11 @@
       ]
     },
     {
+      "name": "zto",
+      "version": "0.1.0",
+      "dependencies": []
+    },
+    {
       "name": "test",
       "version": "1.26.3",
       "dependencies": [
@@ -106,11 +111,6 @@
         "watcher",
         "yaml"
       ]
-    },
-    {
-      "name": "zto",
-      "version": "0.1.0",
-      "dependencies": []
     },
     {
       "name": "source_gen",
