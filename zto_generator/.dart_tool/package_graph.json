@@ -16,6 +16,7 @@
         "build_runner_core",
         "build_test",
         "lints",
+        "matcher",
         "test"
       ]
     },
@@ -54,6 +55,17 @@
         "web_socket_channel",
         "webkit_inspection_protocol",
         "yaml"
+      ]
+    },
+    {
+      "name": "matcher",
+      "version": "0.12.17",
+      "dependencies": [
+        "async",
+        "meta",
+        "stack_trace",
+        "term_glyph",
+        "test_api"
       ]
     },
     {
@@ -331,17 +343,6 @@
       "dependencies": []
     },
     {
-      "name": "matcher",
-      "version": "0.12.17",
-      "dependencies": [
-        "async",
-        "meta",
-        "stack_trace",
-        "term_glyph",
-        "test_api"
-      ]
-    },
-    {
       "name": "js",
       "version": "0.7.2",
       "dependencies": []
@@ -399,6 +400,16 @@
         "collection",
         "meta"
       ]
+    },
+    {
+      "name": "term_glyph",
+      "version": "1.2.2",
+      "dependencies": []
+    },
+    {
+      "name": "meta",
+      "version": "1.18.2",
+      "dependencies": []
     },
     {
       "name": "watcher",
@@ -488,11 +499,6 @@
       "dependencies": [
         "json_annotation"
       ]
-    },
-    {
-      "name": "meta",
-      "version": "1.18.2",
-      "dependencies": []
     },
     {
       "name": "json_annotation",
@@ -644,11 +650,6 @@
     {
       "name": "args",
       "version": "2.7.0",
-      "dependencies": []
-    },
-    {
-      "name": "term_glyph",
-      "version": "1.2.2",
       "dependencies": []
     },
     {
