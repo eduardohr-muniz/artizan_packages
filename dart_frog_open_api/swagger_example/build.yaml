@@ -1,7 +1,0 @@
-targets:
-  $default:
-    builders:
-      zto_generator|zto_generator:
-        generate_for:
-          include:
-            - lib/dtos/**.dart
