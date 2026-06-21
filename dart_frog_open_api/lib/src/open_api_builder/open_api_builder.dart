@@ -62,6 +62,8 @@ class OpenApiBuilder {
   Map<String, dynamic> build() {
     final paths = <String, dynamic>{};
     var hasProtectedRoute = false;
+    final seenOperationIds = <String>{};
+    final referencedSchemes = <String>{};
 
     for (final entry in pathSchemas.entries) {
       final pathName = entry.key;
@@ -76,14 +78,27 @@ class OpenApiBuilder {
         final resolvedSecurity = _resolveOperationSecurity(op);
         if (resolvedSecurity != null && resolvedSecurity.isNotEmpty) {
           hasProtectedRoute = true;
+          referencedSchemes.addAll(resolvedSecurity);
         }
 
-        pathItem[methodName] = _buildOperation(
+        final operation = _buildOperation(
           pathName: pathName,
           methodName: methodName,
           operationSchema: op,
           operationSecurity: resolvedSecurity,
         );
+
+        // operationId must be unique across the whole document.
+        final operationId = operation['operationId'] as String;
+        if (!seenOperationIds.add(operationId)) {
+          throw StateError(
+            'Duplicate operationId "$operationId" (at "$methodName '
+            '$pathName"). Give one of the colliding operations a distinct '
+            'summary or path.',
+          );
+        }
+
+        pathItem[methodName] = operation;
       }
 
       processMethod('get', pathSchema.get);
@@ -113,6 +128,18 @@ class OpenApiBuilder {
     }
 
     final mergedSchemes = _buildSecuritySchemes(hasProtectedRoute);
+
+    // Every referenced security scheme must be defined, otherwise the spec
+    // contains a dangling security requirement.
+    for (final name in {...referencedSchemes, ...?globalSecurity}) {
+      if (!mergedSchemes.containsKey(name)) {
+        throw StateError(
+          'Security scheme "$name" is referenced by an operation but not '
+          'defined. Add it to OpenApiBuilder.securitySchemes.',
+        );
+      }
+    }
+
     final schemas = _collectSchemas();
 
     final components = <String, dynamic>{
@@ -174,7 +201,8 @@ class OpenApiBuilder {
         if (op.requestBodySchema != null && !op.requestBodySchema!.isInline) {
           enqueue(op.requestBodySchema!);
         }
-        if (op.websocketMessageSchema != null) {
+        if (op.websocketMessageSchema != null &&
+            !op.websocketMessageSchema!.isInline) {
           enqueue(op.websocketMessageSchema!);
         }
         for (final s in op.responseSchemas.values) {
@@ -257,6 +285,14 @@ class OpenApiBuilder {
       operationSchema: operationSchema,
       operationSecurity: operationSecurity,
     );
+
+    // OpenAPI 3.0 requires every operation to declare at least one response.
+    if (responses.isEmpty) {
+      throw StateError(
+        'Operation "$methodName $pathName" has no responses. Declare at least '
+        'one, e.g. .ok(...) or .response(200, ...).',
+      );
+    }
 
     final hasRequestBody = operationSchema.requestBodySchema != null;
 

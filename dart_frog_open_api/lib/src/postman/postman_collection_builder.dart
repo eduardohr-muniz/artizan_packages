@@ -82,10 +82,7 @@ class PostmanCollectionBuilder {
       'url': urlObj,
     };
 
-    final hasBody =
-        methodName == 'post' || methodName == 'put' || methodName == 'patch';
-
-    if (hasBody) {
+    if (schema.requestBodySchema != null) {
       request['body'] = _buildBody(schema);
     }
 
@@ -143,11 +140,10 @@ class PostmanCollectionBuilder {
       if (header != null) headers.add(header);
     }
 
-    final hasBody =
-        methodName == 'post' || methodName == 'put' || methodName == 'patch';
-
-    if (hasBody) {
-      headers.add({'key': 'Content-Type', 'value': 'application/json'});
+    if (schema.requestBodySchema != null) {
+      headers.add(
+        {'key': 'Content-Type', 'value': schema.requestContentType},
+      );
     }
 
     return headers;
@@ -191,9 +187,22 @@ class PostmanCollectionBuilder {
   // ---------------------------------------------------------------------------
 
   Map<String, dynamic> _buildBody(OperationSchema? schema) {
-    String raw = '{}';
-
     final requestSchema = schema?.requestBodySchema;
+    final contentType = schema?.requestContentType ?? 'application/json';
+
+    // Non-JSON bodies (binary upload, ndjson stream, ...) have no meaningful
+    // JSON example — emit a typed placeholder instead.
+    if (contentType != 'application/json') {
+      return {
+        'mode': 'raw',
+        'raw': '<$contentType payload>',
+        'options': {
+          'raw': {'language': 'text'},
+        },
+      };
+    }
+
+    String raw = '{}';
     if (requestSchema != null) {
       final properties =
           requestSchema.jsonSchema['properties'] as Map<String, dynamic>?;

@@ -131,8 +131,9 @@ class BrunoCollectionBuilder {
     final bearerScheme = _findScheme(effectiveSecurity, 'bearer');
     final apiKeySchemes = _findApiKeySchemes(effectiveSecurity);
 
-    final hasBody =
-        methodName == 'post' || methodName == 'put' || methodName == 'patch';
+    final hasBody = schema.requestBodySchema != null;
+    final isJsonBody =
+        hasBody && schema.requestContentType == 'application/json';
 
     // meta block
     buf.writeln('meta {');
@@ -146,7 +147,7 @@ class BrunoCollectionBuilder {
     final authType = bearerScheme != null ? 'bearer' : 'none';
     buf.writeln('$methodName {');
     buf.writeln('  url: $url');
-    if (hasBody) buf.writeln('  body: json');
+    if (hasBody) buf.writeln('  body: ${isJsonBody ? 'json' : 'text'}');
     buf.writeln('  auth: $authType');
     buf.writeln('}');
     buf.writeln();
@@ -162,7 +163,7 @@ class BrunoCollectionBuilder {
 
     // headers block
     final headers = <String, String>{};
-    if (hasBody) headers['Content-Type'] = 'application/json';
+    if (hasBody) headers['Content-Type'] = schema.requestContentType;
     for (final schemeName in apiKeySchemes) {
       final scheme = securitySchemes[schemeName];
       if (scheme == null) continue;
@@ -182,13 +183,18 @@ class BrunoCollectionBuilder {
       buf.writeln();
     }
 
-    // body:json block
-    if (hasBody) {
+    // body block — json for application/json, otherwise a text placeholder
+    if (isJsonBody) {
       final bodyJson = _buildExampleBody(schema);
       buf.writeln('body:json {');
       for (final line in bodyJson.split('\n')) {
         buf.writeln('  $line');
       }
+      buf.writeln('}');
+      buf.writeln();
+    } else if (hasBody) {
+      buf.writeln('body:text {');
+      buf.writeln('  <${schema.requestContentType} payload>');
       buf.writeln('}');
       buf.writeln();
     }

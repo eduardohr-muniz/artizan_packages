@@ -82,6 +82,7 @@ void main() {
           '/': PathSchema(
             post: OperationSchema(
               requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
+              responseSchemas: {201: null},
             ),
           ),
         },
@@ -99,7 +100,10 @@ void main() {
         info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
         pathSchemas: {
           '/': PathSchema(
-            post: OperationSchema(requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema)),
+            post: OperationSchema(
+              requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
+              responseSchemas: {201: null},
+            ),
           ),
         },
       ).build();
@@ -115,7 +119,10 @@ void main() {
         info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
         pathSchemas: {
           '/': PathSchema(
-            post: OperationSchema(requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema)),
+            post: OperationSchema(
+              requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
+              responseSchemas: {201: null},
+            ),
           ),
         },
       ).build();
@@ -131,7 +138,10 @@ void main() {
         info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
         pathSchemas: {
           '/': PathSchema(
-            post: OperationSchema(requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema)),
+            post: OperationSchema(
+              requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
+              responseSchemas: {201: null},
+            ),
           ),
         },
       ).build();

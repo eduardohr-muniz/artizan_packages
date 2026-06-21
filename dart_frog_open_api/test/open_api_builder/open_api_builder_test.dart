@@ -10,6 +10,7 @@ void main() {
           '/test': PathSchema(
             get: OperationSchema(
               summary: 'Test GET',
+              responseSchemas: {200: null},
             ),
           ),
         },

@@ -7,6 +7,8 @@ import '../open_api_builder/open_api_info.dart';
 import '../postman/postman_collection_builder.dart';
 import '../schemas/security_scheme.dart';
 import '../schemas/path_schema.dart';
+import '../security/security_config.dart';
+import '../security/security_guard.dart';
 
 export '../postman/postman_collection_builder.dart';
 
@@ -48,6 +50,7 @@ Handler postmanCollectionHandler({
   Map<String, PathSchema>? pathSchemas,
   Map<String, SecurityScheme>? securitySchemes,
   String baseUrl = 'http://localhost:8080',
+  SecurityConfig security = const SecurityConfig(),
 }) {
   return (RequestContext context) {
     if (context.request.method != HttpMethod.get) {
@@ -69,7 +72,10 @@ Handler postmanCollectionHandler({
         HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
         'Content-Disposition':
             'attachment; filename="${_toFilename(info.title)}.postman_collection.json"',
-        'Access-Control-Allow-Origin': '*',
+        // CORS via allowlist only — never a wildcard. Consistent with the
+        // Swagger/JSON handlers.
+        ...SecurityGuard.corsHeaders(context.request, security),
+        ...SecurityGuard.securityResponseHeaders(security),
       },
     );
   };
