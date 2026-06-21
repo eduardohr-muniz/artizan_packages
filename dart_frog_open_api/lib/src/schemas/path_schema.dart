@@ -72,15 +72,16 @@ class OperationSchema {
     this.requestBodyRequired = true,
     this.requestContentType = 'application/json',
     this.responseSchemas = const {},
+    this.responseContentTypes = const {},
     this.responseHeaders = const {},
     this.responseDescriptions = const {},
-    this.responseExamples = const {},
     this.queryParameters = const [],
     this.headerParameters = const [],
     this.postmanTestScript,
     this.postmanPreRequestScript,
     this.brunoTestScript,
     this.brunoPreRequestScript,
+    this.websocketMessageSchema,
     this.extensions = const {},
   });
 
@@ -126,8 +127,18 @@ class OperationSchema {
 
   /// Map of HTTP status code → [OpenApiSchema] for the response body.
   ///
-  /// A `null` value means the response has no body (e.g. 204 No Content).
+  /// A `null` value means the response has no body (e.g. 204 No Content),
+  /// unless [responseContentTypes] declares a media type for that status (e.g.
+  /// a bodyless-but-typed stream).
   final Map<int, OpenApiSchema?> responseSchemas;
+
+  /// Per-status MIME type override for the response body.
+  ///
+  /// Absent → defaults to `application/json`. Used for binary downloads
+  /// (`application/octet-stream`), Server-Sent Events (`text/event-stream`),
+  /// etc. A present entry forces a `content` block even when the schema is
+  /// `null`.
+  final Map<int, String> responseContentTypes;
 
   /// Optional response headers per HTTP status code.
   ///
@@ -148,12 +159,6 @@ class OperationSchema {
   /// responseDescriptions: {200: 'Returns the list of items'}
   /// ```
   final Map<int, String> responseDescriptions;
-
-  /// Named examples for response body per HTTP status code.
-  ///
-  /// OpenAPI target:
-  /// `responses[status].content['application/json'].examples`.
-  final Map<int, Map<String, Map<String, dynamic>>> responseExamples;
 
   /// Query parameters for this operation.
   ///
@@ -203,81 +208,16 @@ class OperationSchema {
   /// ```
   final String? brunoPreRequestScript;
 
+  /// Optional WebSocket message schema for endpoints that upgrade the
+  /// connection (HTTP `101 Switching Protocols`).
+  ///
+  /// OpenAPI 3.0 cannot model WebSocket traffic, so this is surfaced as an
+  /// `x-websocket` extension referencing the message component, and the schema
+  /// is registered in `components/schemas`.
+  final OpenApiSchema? websocketMessageSchema;
+
   /// Custom OpenAPI extensions (keys starting with `x-`).
   final Map<String, dynamic> extensions;
-}
-
-/// Context passed to `buildExamples` callback in fluent API.
-class ResponseExampleContext {
-  ResponseExampleContext({
-    required this.status,
-    this.description,
-    this.schemaTypeName,
-  });
-
-  final int status;
-  final String? description;
-  final String? schemaTypeName;
-
-  final List<Object?> _items = [];
-
-  List<Object?> get items => List.unmodifiable(_items);
-
-  ResponseExampleContext add({
-    required Object? response,
-    String? name,
-    String? summary,
-    String? description,
-  }) {
-    if (response == null) return this;
-    if (name != null && response is! OpenApiResponseExample) {
-      if (response is Map<String, dynamic>) {
-        _items.add(
-          OpenApiResponseExample(
-            name: name,
-            summary: summary,
-            description: description,
-            value: response,
-          ),
-        );
-        return this;
-      }
-      _items.add(response);
-      return this;
-    }
-    _items.add(response);
-    return this;
-  }
-
-  ResponseExampleContext addAll(Iterable<Object?> examples) {
-    for (final e in examples) {
-      add(response: e);
-    }
-    return this;
-  }
-}
-
-/// Structured response example for OpenAPI docs.
-class OpenApiResponseExample {
-  const OpenApiResponseExample({
-    required this.name,
-    required this.value,
-    this.summary,
-    this.description,
-  });
-
-  final String name;
-  final Map<String, dynamic> value;
-  final String? summary;
-  final String? description;
-
-  Map<String, dynamic> toOpenApiMap() {
-    return {
-      if (summary != null) 'summary': summary,
-      if (description != null) 'description': description,
-      'value': value,
-    };
-  }
 }
 
 /// Describes [OperationSchema] per HTTP method for a single API path.

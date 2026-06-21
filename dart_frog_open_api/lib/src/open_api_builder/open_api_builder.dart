@@ -171,9 +171,22 @@ class OpenApiBuilder {
         pathSchema.delete
       ]) {
         if (op == null) continue;
-        if (op.requestBodySchema != null) enqueue(op.requestBodySchema!);
+        if (op.requestBodySchema != null && !op.requestBodySchema!.isInline) {
+          enqueue(op.requestBodySchema!);
+        }
+        if (op.websocketMessageSchema != null) {
+          enqueue(op.websocketMessageSchema!);
+        }
         for (final s in op.responseSchemas.values) {
-          if (s != null) enqueue(s);
+          if (s == null) continue;
+          // Inline schemas are emitted at the use site, not as components.
+          if (!s.isInline) enqueue(s);
+          // Array wrappers (e.g. `XList`) reference their item via `$ref`, so
+          // the item schema itself must also be registered as a component.
+          final item = s.ztoSchema;
+          if (item != null && item.typeName != s.typeName) {
+            enqueue(OpenApiSchema.fromZto(item));
+          }
         }
       }
     }
@@ -288,17 +301,19 @@ class OpenApiBuilder {
     return globalSecurity;
   }
 
-  Map<String, dynamic> _buildRequestBody(OperationSchema schema) => {
-        'required': schema.requestBodyRequired,
-        'content': {
-          schema.requestContentType: {
-            'schema': {
-              r'$ref':
-                  '#/components/schemas/${schema.requestBodySchema!.typeName}'
-            },
-          },
+  Map<String, dynamic> _buildRequestBody(OperationSchema schema) {
+    final body = schema.requestBodySchema!;
+    return {
+      'required': schema.requestBodyRequired,
+      'content': {
+        schema.requestContentType: {
+          'schema': body.isInline
+              ? body.jsonSchema
+              : {r'$ref': '#/components/schemas/${body.typeName}'},
         },
-      };
+      },
+    };
+  }
 
   Map<String, dynamic> _buildParameter(ParameterSchema p, String location) {
     final schemaMap = <String, dynamic>{'type': p.type};
@@ -333,7 +348,6 @@ class OpenApiBuilder {
       // Determine description: custom override → default
       final description = operationSchema.responseDescriptions[code] ??
           _statusDescription(code);
-      final examples = operationSchema.responseExamples[code];
 
       // Determine response headers for this status code
       final headers = operationSchema.responseHeaders[code];
@@ -344,17 +358,22 @@ class OpenApiBuilder {
         };
       }
 
-      if (responseSchema != null) {
+      // A declared content type forces a `content` block even when the schema
+      // is null (e.g. a schemaless SSE/stream response).
+      final contentType = operationSchema.responseContentTypes[code];
+      final hasContent = responseSchema != null || contentType != null;
+
+      if (hasContent) {
         final mediaType = <String, dynamic>{
-          'schema': {
-            r'$ref': '#/components/schemas/${responseSchema.typeName}'
-          },
-          if (examples != null && examples.isNotEmpty) 'examples': examples,
+          if (responseSchema != null)
+            'schema': responseSchema.isInline
+                ? responseSchema.jsonSchema
+                : {r'$ref': '#/components/schemas/${responseSchema.typeName}'},
         };
         responses[codeStr] = {
           'description': description,
           'content': {
-            'application/json': mediaType,
+            (contentType ?? 'application/json'): mediaType,
           },
           if (headersMap != null) 'headers': headersMap,
         };
@@ -381,8 +400,10 @@ class OpenApiBuilder {
 
   String _statusDescription(int code) {
     return switch (code) {
+      101 => 'Switching Protocols',
       200 => 'Success',
       201 => 'Created',
+      202 => 'Accepted',
       204 => 'No Content',
       400 => 'Bad Request',
       401 => 'Unauthorized',

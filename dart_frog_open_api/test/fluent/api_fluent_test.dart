@@ -18,11 +18,11 @@ void main() {
               .tag('Items')
               .public()
               .query('page', ParamType.integer, example: 1)
-              .returns(200, description: 'Success list')
+              .response(200, description: 'Success list')
           )
           .post((op) => op
               .summary('Create item')
-              .returns(201, description: 'Created item')
+              .response(201, description: 'Created item')
           )
           .build();
 
@@ -42,11 +42,10 @@ void main() {
       expect(pathSchema.put, isNull);
     });
 
-    test('returnsListOf sets array responseSchema and description', () {
+    test('response com listOfZtoSchema define array responseSchema e descrição', () {
       final pathSchema = Api.path()
-          .get((op) => op
-              .summary('List items')
-              .returnsListOf(200, _itemSchema, description: 'Lista de itens'))
+          .get((op) => op.summary('List items').response(
+              200, listOfZtoSchema: _itemSchema, description: 'Lista de itens'))
           .build();
 
       final op = pathSchema.get!;
@@ -59,12 +58,119 @@ void main() {
       expect(items[r'$ref'], equals('#/components/schemas/ItemDto'));
     });
 
-    test('returnsListOf without description leaves responseDescriptions empty', () {
+    test('ok(listOfZtoSchema:) sem descrição deixa responseDescriptions vazio', () {
       final pathSchema = Api.path()
-          .get((op) => op.summary('X').returnsListOf(200, _itemSchema))
+          .get((op) => op.summary('X').ok(listOfZtoSchema: _itemSchema))
           .build();
 
       expect(pathSchema.get!.responseDescriptions.containsKey(200), isFalse);
+    });
+
+    test('response agrupa schema, header e descrição no mesmo status', () {
+      final pathSchema = Api.path()
+          .get((op) => op.summary('List').response(
+                200,
+                ztoSchema: _itemSchema,
+                description: 'Lista paginada',
+                headers: const [
+                  ResHeader('X-Total-Count', ParamType.integer,
+                      description: 'Total de registros'),
+                ],
+              ))
+          .build();
+
+      final op = pathSchema.get!;
+      expect(op.responseSchemas[200]!.typeName, equals('ItemDto'));
+      expect(op.responseDescriptions[200], equals('Lista paginada'));
+      final header = op.responseHeaders[200]!.single;
+      expect(header.name, equals('X-Total-Count'));
+      expect(header.type, equals('integer'));
+      expect(header.description, equals('Total de registros'));
+    });
+
+    test('json infere schema da resposta real e anexa example', () {
+      final pathSchema = Api.path()
+          .get((op) => op.summary('Ping').ok(json: const {'pong': true, 'count': 3}))
+          .build();
+
+      final schema = pathSchema.get!.responseSchemas[200]!;
+      expect(schema.isInline, isTrue);
+      expect(schema.typeName, isEmpty);
+      expect(schema.jsonSchema['type'], equals('object'));
+      final props = schema.jsonSchema['properties'] as Map<String, dynamic>;
+      expect(props['pong']['type'], equals('boolean'));
+      expect(props['count']['type'], equals('integer'));
+      expect(schema.jsonSchema['example'], equals({'pong': true, 'count': 3}));
+    });
+
+    test('listOfJson infere array do item e usa [item] como example', () {
+      final pathSchema = Api.path()
+          .get((op) => op.summary('List').response(
+              200, listOfJson: const {'id': 'usr_1'}))
+          .build();
+
+      final schema = pathSchema.get!.responseSchemas[200]!;
+      expect(schema.isInline, isTrue);
+      expect(schema.jsonSchema['type'], equals('array'));
+      expect(schema.jsonSchema['items']['type'], equals('object'));
+      expect(schema.jsonSchema['items']['properties']['id']['type'], equals('string'));
+      expect(schema.jsonSchema['example'], equals([
+        {'id': 'usr_1'}
+      ]));
+    });
+
+    test('created/noContent/badRequest mapeiam para os status corretos', () {
+      final pathSchema = Api.path()
+          .post((op) => op
+              .summary('Create')
+              .created(ztoSchema: _itemSchema, headers: const [
+                ResHeader('Location', ParamType.string,
+                    description: 'URL do recurso'),
+              ])
+              .badRequest(description: 'Dados inválidos'))
+          .delete((op) => op.summary('Delete').noContent())
+          .build();
+
+      final post = pathSchema.post!;
+      expect(post.responseSchemas.containsKey(201), isTrue);
+      expect(post.responseHeaders[201]!.single.name, equals('Location'));
+      expect(post.responseSchemas.containsKey(400), isTrue);
+      expect(post.responseSchemas[400], isNull);
+
+      final del = pathSchema.delete!;
+      expect(del.responseSchemas.containsKey(204), isTrue);
+      expect(del.responseSchemas[204], isNull);
+    });
+
+    test('accepted/tooManyRequests/serverError/serviceUnavailable mapeiam o status', () {
+      final pathSchema = Api.path()
+          .post((op) => op
+              .accepted(ztoSchema: _itemSchema)
+              .tooManyRequests(description: 'Rate limit')
+              .serverError()
+              .serviceUnavailable())
+          .build();
+
+      final post = pathSchema.post!;
+      expect(post.responseSchemas[202]!.typeName, equals('ItemDto'));
+      expect(post.responseDescriptions[429], equals('Rate limit'));
+      expect(post.responseSchemas.containsKey(500), isTrue);
+      expect(post.responseSchemas.containsKey(503), isTrue);
+    });
+
+    test('response com dois modos de corpo dispara AssertionError', () {
+      expect(
+        () => Api.path().get((op) =>
+            op.response(200, ztoSchema: _itemSchema, json: const {'a': 1})),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('declarar o mesmo status duas vezes dispara AssertionError', () {
+      expect(
+        () => Api.path().get((op) => op.ok(ztoSchema: _itemSchema).ok()),
+        throwsA(isA<AssertionError>()),
+      );
     });
 
     group('queryParam', () {
