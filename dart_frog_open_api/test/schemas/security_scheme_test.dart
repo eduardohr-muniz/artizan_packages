@@ -1,4 +1,4 @@
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,4 +1,4 @@
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
@@ -22,12 +22,14 @@ void main() {
     });
 
     test('holds requestBodySchema', () {
-      final op = OperationSchema(requestBodySchema: OpenApiSchema.fromZto(_testDtoSchema));
+      final op = OperationSchema(
+          requestBodySchema: OpenApiSchema.fromZto(_testDtoSchema));
       expect(op.requestBodySchema!.typeName, equals('TestDto'));
     });
 
     test('holds responseSchemas keyed by status code', () {
-      final op = OperationSchema(responseSchemas: {200: OpenApiSchema.fromZto(_testDtoSchema)});
+      final op = OperationSchema(
+          responseSchemas: {200: OpenApiSchema.fromZto(_testDtoSchema)});
       expect(op.responseSchemas[200]!.typeName, equals('TestDto'));
     });
 
@@ -61,8 +63,10 @@ void main() {
     });
 
     test('can define schemas for multiple methods', () {
-      final getOp = OperationSchema(responseSchemas: {200: OpenApiSchema.fromZto(_testDtoSchema)});
-      final postOp = OperationSchema(requestBodySchema: OpenApiSchema.fromZto(_testDtoSchema));
+      final getOp = OperationSchema(
+          responseSchemas: {200: OpenApiSchema.fromZto(_testDtoSchema)});
+      final postOp = OperationSchema(
+          requestBodySchema: OpenApiSchema.fromZto(_testDtoSchema));
 
       final schema = PathSchema(get: getOp, post: postOp);
       expect(schema.forMethod('get'), same(getOp));
@@ -83,7 +87,8 @@ void main() {
     });
 
     test('holds brunoTestScript value', () {
-      const script = 'test("ok", function() { expect(res.getStatus()).to.equal(200); });';
+      const script =
+          'test("ok", function() { expect(res.getStatus()).to.equal(200); });';
       const op = OperationSchema(brunoTestScript: script);
       expect(op.brunoTestScript, equals(script));
     });
@@ -134,7 +139,10 @@ void main() {
     test('holds header parameters', () {
       const op = OperationSchema(
         headerParameters: [
-          ParameterSchema(name: 'X-Tenant-Id', type: 'string', description: 'Tenant identifier'),
+          ParameterSchema(
+              name: 'X-Tenant-Id',
+              type: 'string',
+              description: 'Tenant identifier'),
         ],
       );
       expect(op.headerParameters, hasLength(1));
@@ -157,7 +165,8 @@ void main() {
 
   group('ResponseHeaderSchema', () {
     test('holds name, description, and default type string', () {
-      const h = ResponseHeaderSchema(name: 'Location', description: 'Resource URL');
+      const h =
+          ResponseHeaderSchema(name: 'Location', description: 'Resource URL');
       expect(h.name, 'Location');
       expect(h.description, 'Resource URL');
       expect(h.type, 'string');
@@ -212,7 +221,8 @@ void main() {
     test('holds path parameter overrides', () {
       const schema = PathSchema(
         pathParameters: {
-          'id': ParameterSchema(name: 'id', type: 'integer', description: 'Resource ID'),
+          'id': ParameterSchema(
+              name: 'id', type: 'integer', description: 'Resource ID'),
         },
       );
       expect(schema.pathParameters.containsKey('id'), isTrue);

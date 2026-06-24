@@ -22,7 +22,8 @@ class ApiPathBuilder {
   OperationSchema? _delete;
 
   /// Defines a path parameter (e.g., `{id}`).
-  ApiPathBuilder param(String name, ParamType type, {String? description, Object? example}) {
+  ApiPathBuilder param(String name, ParamType type,
+      {String? description, Object? example}) {
     _pathParameters[name] = ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -62,7 +63,8 @@ class ApiPathBuilder {
     return this;
   }
 
-  OperationSchema _buildOperation(void Function(OperationBuilder op) configure) {
+  OperationSchema _buildOperation(
+      void Function(OperationBuilder op) configure) {
     final builder = OperationBuilder();
     configure(builder);
     return builder.build();
@@ -157,7 +159,8 @@ class OperationBuilder {
   }
 
   /// Adds a query parameter to this operation.
-  OperationBuilder query(String name, ParamType type, {String? description, Object? example, List<String>? values}) {
+  OperationBuilder query(String name, ParamType type,
+      {String? description, Object? example, List<String>? values}) {
     _queryParameters.add(ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -172,7 +175,8 @@ class OperationBuilder {
   ///
   /// Shorthand for [query] when the type is always `string` and `required`
   /// matters (e.g. `.queryParam('user_id', required: true)`).
-  OperationBuilder queryParam(String name, {String? description, bool required = false, Object? example}) {
+  OperationBuilder queryParam(String name,
+      {String? description, bool required = false, Object? example}) {
     _queryParameters.add(ParameterSchema(
       name: name,
       type: ParamType.string.openApiName,
@@ -184,7 +188,8 @@ class OperationBuilder {
   }
 
   /// Adds a header parameter to this operation.
-  OperationBuilder header(String name, ParamType type, {String? description, String? format, Object? example}) {
+  OperationBuilder header(String name, ParamType type,
+      {String? description, String? format, Object? example}) {
     _headerParameters.add(ParameterSchema(
       name: name,
       type: type.openApiName,
@@ -196,7 +201,8 @@ class OperationBuilder {
   }
 
   /// Configures the request body using a Zto schema.
-  OperationBuilder body(ZtoSchema schema, {bool required = true, String contentType = 'application/json'}) {
+  OperationBuilder body(ZtoSchema schema,
+      {bool required = true, String contentType = 'application/json'}) {
     _requestBodySchema = OpenApiSchema.fromZto(schema);
     _requestBodyRequired = required;
     _requestContentType = contentType;
@@ -210,7 +216,8 @@ class OperationBuilder {
     String contentType = 'application/octet-stream',
     bool required = true,
   }) {
-    _requestBodySchema = OpenApiSchema.inline({'type': 'string', 'format': 'binary'});
+    _requestBodySchema =
+        OpenApiSchema.inline({'type': 'string', 'format': 'binary'});
     _requestContentType = contentType;
     _requestBodyRequired = required;
     return this;
@@ -239,7 +246,8 @@ class OperationBuilder {
   /// `101 Switching Protocols` handshake and surfaces the message contract as
   /// an `x-websocket` extension (the [messageZtoSchema] is registered in
   /// `components/schemas`).
-  OperationBuilder websocket({ZtoSchema? messageZtoSchema, String? description}) {
+  OperationBuilder websocket(
+      {ZtoSchema? messageZtoSchema, String? description}) {
     _responseSchemas[101] = null;
     if (description != null) _responseDescriptions[101] = description;
     if (messageZtoSchema != null) {
@@ -691,4 +699,3 @@ Map<String, dynamic> _inferSchema(Object? value) {
   if (value is String) return {'type': 'string'};
   return <String, dynamic>{};
 }
-

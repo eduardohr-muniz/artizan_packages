@@ -1,26 +1,32 @@
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 const $createUserDtoSchema = ZtoSchema(
   typeName: 'CreateUserDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'name'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'name'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $wsMessageDtoSchema = ZtoSchema(
   typeName: 'WsMessageDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'type'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'type'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 Map<String, dynamic> _spec(Map<String, PathSchema> paths,
         {List<String>? globalSecurity}) =>
     OpenApiBuilder(
-      info: const OpenApiInfo(title: 'T', version: '1.0.0'),
+      info: const OpenApiInfo(title: 'T'),
       pathSchemas: paths,
       globalSecurity: globalSecurity,
     ).build();
@@ -28,14 +34,13 @@ Map<String, dynamic> _spec(Map<String, PathSchema> paths,
 void main() {
   group('#6 — operação sem response é rejeitada', () {
     test('build() lança StateError quando uma operação não tem response', () {
-      final doc = Api.path()
-          .get((op) => op.summary('Sem response').public())
-          .build();
+      final doc =
+          Api.path().get((op) => op.summary('Sem response').public()).build();
 
       expect(
         () => _spec({'/x': doc}),
-        throwsA(isA<StateError>().having(
-            (e) => e.message, 'message', contains('no responses'))),
+        throwsA(isA<StateError>()
+            .having((e) => e.message, 'message', contains('no responses'))),
       );
     });
   });
@@ -43,12 +48,8 @@ void main() {
   group('#7 — operationId duplicado é rejeitado', () {
     test('build() lança StateError em operationId colidente', () {
       // Mesmo método + path normalizado idêntico → mesmo operationId.
-      final a = Api.path()
-          .get((op) => op.summary('A').public().ok())
-          .build();
-      final b = Api.path()
-          .get((op) => op.summary('A').public().ok())
-          .build();
+      final a = Api.path().get((op) => op.summary('A').public().ok()).build();
+      final b = Api.path().get((op) => op.summary('A').public().ok()).build();
 
       // Dois paths que normalizam para o mesmo operationId.
       expect(
@@ -82,21 +83,22 @@ void main() {
   });
 
   group('#1 — content-type do request body nas collections', () {
-    PathSchema _uploadPath() => Api.path()
+    PathSchema uploadPath() => Api.path()
         .post((op) => op
             .summary('Upload')
             .bytesBody(contentType: 'image/png')
             .response(201))
         .build();
 
-    PathSchema _jsonPath() => Api.path()
+    PathSchema jsonPath() => Api.path()
         .post((op) => op.summary('Criar').body($createUserDtoSchema).created())
         .build();
 
-    test('Postman usa requestContentType (binário) em vez de application/json', () {
+    test('Postman usa requestContentType (binário) em vez de application/json',
+        () {
       final collection = PostmanCollectionBuilder(
-        info: const OpenApiInfo(title: 'T', version: '1.0.0'),
-        pathSchemas: {'/upload': _uploadPath()},
+        info: const OpenApiInfo(title: 'T'),
+        pathSchemas: {'/upload': uploadPath()},
       ).build();
 
       final json = collection.toString();
@@ -107,16 +109,16 @@ void main() {
 
     test('Postman mantém application/json para body JSON', () {
       final collection = PostmanCollectionBuilder(
-        info: const OpenApiInfo(title: 'T', version: '1.0.0'),
-        pathSchemas: {'/users': _jsonPath()},
+        info: const OpenApiInfo(title: 'T'),
+        pathSchemas: {'/users': jsonPath()},
       ).build();
       expect(collection.toString(), contains('application/json'));
     });
 
     test('Bruno usa requestContentType e body:text para não-JSON', () {
       final bruno = BrunoCollectionBuilder(
-        info: const OpenApiInfo(title: 'T', version: '1.0.0'),
-        pathSchemas: {'/upload': _uploadPath()},
+        info: const OpenApiInfo(title: 'T'),
+        pathSchemas: {'/upload': uploadPath()},
       ).build();
 
       final content = bruno.values.join('\n');

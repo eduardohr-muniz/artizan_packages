@@ -89,9 +89,9 @@ class BrunoCollectionBuilder {
   // ---------------------------------------------------------------------------
 
   String _buildEnvironmentFile() {
-    final buf = StringBuffer();
-    buf.writeln('vars {');
-    buf.writeln('  baseUrl: $baseUrl');
+    final buf = StringBuffer()
+      ..writeln('vars {')
+      ..writeln('  baseUrl: $baseUrl');
 
     for (final entry in securitySchemes.entries) {
       final varName = varNameForScheme(entry.key);
@@ -136,29 +136,33 @@ class BrunoCollectionBuilder {
         hasBody && schema.requestContentType == 'application/json';
 
     // meta block
-    buf.writeln('meta {');
-    buf.writeln('  name: $name');
-    buf.writeln('  type: http');
-    buf.writeln('  seq: $seq');
-    buf.writeln('}');
-    buf.writeln();
+    buf
+      ..writeln('meta {')
+      ..writeln('  name: $name')
+      ..writeln('  type: http')
+      ..writeln('  seq: $seq')
+      ..writeln('}')
+      ..writeln();
 
     // method block
     final authType = bearerScheme != null ? 'bearer' : 'none';
-    buf.writeln('$methodName {');
-    buf.writeln('  url: $url');
+    buf
+      ..writeln('$methodName {')
+      ..writeln('  url: $url');
     if (hasBody) buf.writeln('  body: ${isJsonBody ? 'json' : 'text'}');
-    buf.writeln('  auth: $authType');
-    buf.writeln('}');
-    buf.writeln();
+    buf
+      ..writeln('  auth: $authType')
+      ..writeln('}')
+      ..writeln();
 
     // auth:bearer block (must be right after request in some Bruno versions)
     if (bearerScheme != null) {
       final varName = varNameForScheme(bearerScheme);
-      buf.writeln('auth:bearer {');
-      buf.writeln('  token: {{$varName}}');
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('auth:bearer {')
+        ..writeln('  token: {{$varName}}')
+        ..writeln('}')
+        ..writeln();
     }
 
     // headers block
@@ -170,7 +174,7 @@ class BrunoCollectionBuilder {
       final varName = varNameForScheme(schemeName);
       final header = scheme.postmanHeader(varName);
       if (header != null) {
-        headers[header['key']!] = '{{${varName}}}';
+        headers[header['key']!] = '{{$varName}}';
       }
     }
 
@@ -179,8 +183,9 @@ class BrunoCollectionBuilder {
       for (final entry in headers.entries) {
         buf.writeln('  ${entry.key}: ${entry.value}');
       }
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('}')
+        ..writeln();
     }
 
     // body block — json for application/json, otherwise a text placeholder
@@ -190,13 +195,15 @@ class BrunoCollectionBuilder {
       for (final line in bodyJson.split('\n')) {
         buf.writeln('  $line');
       }
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('}')
+        ..writeln();
     } else if (hasBody) {
-      buf.writeln('body:text {');
-      buf.writeln('  <${schema.requestContentType} payload>');
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('body:text {')
+        ..writeln('  <${schema.requestContentType} payload>')
+        ..writeln('}')
+        ..writeln();
     }
 
     // docs block (Bruno Docs tab - markdown)
@@ -206,22 +213,25 @@ class BrunoCollectionBuilder {
       for (final line in docsContent.split('\n')) {
         buf.writeln('  $line');
       }
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('}')
+        ..writeln();
     }
 
     if (schema.brunoPreRequestScript != null) {
       buf.writeln('script:pre-request {');
       _writeIndentedScript(buf, schema.brunoPreRequestScript!);
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('}')
+        ..writeln();
     }
 
     if (schema.brunoTestScript != null) {
       buf.writeln('script:post-response {');
       _writeIndentedScript(buf, schema.brunoTestScript!);
-      buf.writeln('}');
-      buf.writeln();
+      buf
+        ..writeln('}')
+        ..writeln();
     }
 
     return buf.toString().trimRight();
@@ -329,9 +339,10 @@ class BrunoCollectionBuilder {
       final table = _schemaToMarkdownTable(schema.requestBodySchema!);
       if (table.isNotEmpty) {
         if (parts.isNotEmpty) parts.add('');
-        parts.add('### Request body schema');
-        parts.add('');
-        parts.add(table);
+        parts
+          ..add('### Request body schema')
+          ..add('')
+          ..add(table);
       }
     }
 
@@ -342,9 +353,10 @@ class BrunoCollectionBuilder {
         final table = _schemaToMarkdownTable(dtoSchema);
         if (table.isNotEmpty) {
           if (parts.isNotEmpty) parts.add('');
-          parts.add('### Response ${entry.key} schema');
-          parts.add('');
-          parts.add(table);
+          parts
+            ..add('### Response ${entry.key} schema')
+            ..add('')
+            ..add(table);
         }
       }
     }
@@ -354,8 +366,7 @@ class BrunoCollectionBuilder {
 
   String _schemaToMarkdownTable(OpenApiSchema schema) {
     final rawProps = schema.jsonSchema['properties'];
-    final props =
-        rawProps is Map<String, dynamic> ? rawProps : null;
+    final props = rawProps is Map<String, dynamic> ? rawProps : null;
     if (props == null || props.isEmpty) return '';
 
     final rawReq = schema.jsonSchema['required'];

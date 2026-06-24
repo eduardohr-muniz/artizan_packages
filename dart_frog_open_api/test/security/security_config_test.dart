@@ -2,7 +2,7 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:test/test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../lib/src/security/security_config.dart';
+import 'package:dart_frog_open_api/src/security/security_config.dart';
 
 class _MockRequest extends Mock implements Request {}
 
@@ -47,7 +47,7 @@ void main() {
       });
 
       test('can be set to false explicitly', () {
-        const config = SecurityConfig(enabled: false);
+        const config = SecurityConfig();
         expect(config.enabled, isFalse);
       });
     });
@@ -105,7 +105,6 @@ void main() {
         const config = SecurityConfig(
           enabled: true,
           corsOrigins: ['http://localhost:3000'],
-          securityHeaders: true,
           cacheTtl: Duration(minutes: 10),
           logAccess: true,
         );

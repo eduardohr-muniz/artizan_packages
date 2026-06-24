@@ -56,7 +56,8 @@ class OpenApiSchema {
   ///
   /// The map is emitted as-is at the use site (no `$ref`, no component entry).
   /// Use this for ad-hoc shapes that are not backed by a `zto` DTO.
-  factory OpenApiSchema.inline(Map<String, dynamic> jsonSchema) => OpenApiSchema(
+  factory OpenApiSchema.inline(Map<String, dynamic> jsonSchema) =>
+      OpenApiSchema(
         typeName: '',
         jsonSchema: jsonSchema,
         isInline: true,

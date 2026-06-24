@@ -1,12 +1,12 @@
 import 'package:test/test.dart';
-import 'package:zto/src/core/zto_schema.dart';
 import 'package:zto/zto.dart';
 
 void main() {
   group('Field type annotations', () {
     group('@ZString', () {
       test('is const and holds mapKey, description, example', () {
-        const a = ZString(mapKey: 'name', description: 'Full name', example: 'John');
+        const a =
+            ZString(mapKey: 'name', description: 'Full name', example: 'John');
         expect(a.mapKey, 'name');
         expect(a.key, 'name');
         expect(a.description, 'Full name');
@@ -64,7 +64,8 @@ void main() {
 
     group('@ZBool', () {
       test('is const and holds mapKey, description, example', () {
-        const a = ZBool(mapKey: 'active', description: 'Is active', example: true);
+        const a =
+            ZBool(mapKey: 'active', description: 'Is active', example: true);
         expect(a.mapKey, 'active');
         expect(a.description, 'Is active');
         expect(a.example, true);
@@ -96,7 +97,11 @@ void main() {
       });
 
       test('holds description and example', () {
-        const a = ZEnum(mapKey: 'role', values: ['a', 'b'], description: 'Role', example: 'admin');
+        const a = ZEnum(
+            mapKey: 'role',
+            values: ['a', 'b'],
+            description: 'Role',
+            example: 'admin');
         expect(a.description, 'Role');
         expect(a.example, 'admin');
       });
@@ -142,18 +147,15 @@ void main() {
     });
   });
 
-  group('Modifier annotations', () {
-    test('@ZNullable is const', () {
-      const a = ZNullable();
-      expect(a, isA<ZNullable>());
-    });
-  });
-
   group('ParseType', () {
-    test('camelCase value exists', () => expect(ParseType.camelCase, isA<ParseType>()));
-    test('snakeCase value exists', () => expect(ParseType.snakeCase, isA<ParseType>()));
-    test('pascalCase value exists', () => expect(ParseType.pascalCase, isA<ParseType>()));
-    test('kebabCase value exists', () => expect(ParseType.kebabCase, isA<ParseType>()));
+    test('camelCase value exists',
+        () => expect(ParseType.camelCase, isA<ParseType>()));
+    test('snakeCase value exists',
+        () => expect(ParseType.snakeCase, isA<ParseType>()));
+    test('pascalCase value exists',
+        () => expect(ParseType.pascalCase, isA<ParseType>()));
+    test('kebabCase value exists',
+        () => expect(ParseType.kebabCase, isA<ParseType>()));
   });
 
   group('@ZDto', () {

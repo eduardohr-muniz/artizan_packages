@@ -11,13 +11,16 @@ import 'validator_compatibility.dart';
 ///
 /// When [includeRegistration] is true, emits a `final _ztoReg...` line for
 /// DTOs with `fromMap`. Set to false when using [Zto.registerSchemas].
-String generateSchemaForClass(ClassElement classElement, {bool includeRegistration = true}) {
+String generateSchemaForClass(ClassElement classElement,
+    {bool includeRegistration = true}) {
   final className = classElement.name;
   final schemaName = '\$${className}Schema';
   final parseType = _getParseType(classElement);
 
   final fields = _annotatedFields(classElement);
-  final descriptors = fields.map((f) => _buildDescriptor(f, classElement, parseType)).join(',\n    ');
+  final descriptors = fields
+      .map((f) => _buildDescriptor(f, classElement, parseType))
+      .join(',\n    ');
 
   final hasFromMap = classElement.constructors.any((c) => c.name == 'fromMap');
 
@@ -44,7 +47,9 @@ ParseType _getParseType(ClassElement classElement) {
     final obj = meta.computeConstantValue();
     if (obj == null) continue;
     final typeName = obj.type?.element?.name;
-    if (typeName != 'ZDto' && typeName != 'ZEntity' && typeName != 'ZModel') continue;
+    if (typeName != 'ZDto' && typeName != 'ZEntity' && typeName != 'ZModel') {
+      continue;
+    }
 
     final parseTypeObj = obj.getField('parseType');
     if (parseTypeObj == null) continue;
@@ -75,7 +80,10 @@ String _applyParseType(String dartFieldName, ParseType parseType) {
 }
 
 String _toSnakeCase(String s) {
-  return s.replaceAllMapped(RegExp(r'(?<=[a-z0-9])([A-Z])'), (m) => '_${m.group(1)!.toLowerCase()}').toLowerCase();
+  return s
+      .replaceAllMapped(RegExp(r'(?<=[a-z0-9])([A-Z])'),
+          (m) => '_${m.group(1)!.toLowerCase()}')
+      .toLowerCase();
 }
 
 String _toPascalCase(String s) {
@@ -122,7 +130,10 @@ String _encodeFieldAnnotationWithKey(FieldElement field, String resolvedKey) {
     if (typeName == 'ZEnum' && !source.contains('values:')) {
       final element = field.type.element;
       if (element is EnumElement) {
-        final enumValues = element.fields.where((f) => f.isEnumConstant).map((f) => f.name).toList();
+        final enumValues = element.fields
+            .where((f) => f.isEnumConstant)
+            .map((f) => f.name)
+            .toList();
         final valuesArg = enumValues.map((v) => "'$v'").join(', ');
         return "ZEnum(values: [$valuesArg], mapKey: '$resolvedKey')";
       }
@@ -134,7 +145,8 @@ String _encodeFieldAnnotationWithKey(FieldElement field, String resolvedKey) {
       final dartTypeName = field.type.element?.name ?? 'dynamic';
       final schemaRef = '\$${dartTypeName}Schema';
       final descMatch = RegExp(r"description:\s*'([^']+)'").firstMatch(source);
-      final desc = descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
+      final desc =
+          descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
       return "ZObj(mapKey: '$resolvedKey', dtoSchema: $schemaRef$desc)";
     }
 
@@ -143,8 +155,10 @@ String _encodeFieldAnnotationWithKey(FieldElement field, String resolvedKey) {
       final itemElement = _getListItemElement(field);
       if (itemElement != null && _isDtoAnnotated(itemElement)) {
         final schemaRef = '\$${itemElement.name}Schema';
-        final descMatch = RegExp(r"description:\s*'([^']+)'").firstMatch(source);
-        final desc = descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
+        final descMatch =
+            RegExp(r"description:\s*'([^']+)'").firstMatch(source);
+        final desc =
+            descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
         return "ZListOf(mapKey: '$resolvedKey', dtoSchema: $schemaRef$desc)";
       }
     }
@@ -155,8 +169,10 @@ String _encodeFieldAnnotationWithKey(FieldElement field, String resolvedKey) {
       final itemElement = _getListItemElement(field);
       if (itemElement != null && _isDtoAnnotated(itemElement)) {
         final schemaRef = '\$${itemElement.name}Schema';
-        final descMatch = RegExp(r"description:\s*'([^']+)'").firstMatch(source);
-        final desc = descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
+        final descMatch =
+            RegExp(r"description:\s*'([^']+)'").firstMatch(source);
+        final desc =
+            descMatch != null ? ", description: '${descMatch.group(1)}'" : '';
         return "ZListOf(mapKey: '$resolvedKey', dtoSchema: $schemaRef$desc)";
       }
     }
@@ -173,7 +189,10 @@ String _encodeFieldAnnotationWithKey(FieldElement field, String resolvedKey) {
   // Fallback: infer ZEnum for unannotated enum fields
   if (field.type.element is EnumElement) {
     final element = field.type.element as EnumElement;
-    final enumValues = element.fields.where((f) => f.isEnumConstant).map((f) => f.name).toList();
+    final enumValues = element.fields
+        .where((f) => f.isEnumConstant)
+        .map((f) => f.name)
+        .toList();
     final valuesArg = enumValues.map((v) => "'$v'").join(', ');
     return "ZEnum(values: [$valuesArg], mapKey: '$resolvedKey')";
   }
@@ -204,7 +223,9 @@ String _injectMapKeyIntoSource(String source, String resolvedKey) {
   inner = inner.trim();
   if (inner.startsWith(',')) inner = inner.substring(1).trim();
 
-  final newArgs = inner.isEmpty ? "mapKey: '$resolvedKey'" : "mapKey: '$resolvedKey', $inner";
+  final newArgs = inner.isEmpty
+      ? "mapKey: '$resolvedKey'"
+      : "mapKey: '$resolvedKey', $inner";
   return '$typeName($newArgs)';
 }
 
@@ -235,7 +256,8 @@ bool _fieldTypeIsDtoAnnotated(FieldElement field) {
 
 // ── Descriptor generation ──────────────────────────────────────────────────
 
-String _buildDescriptor(FieldElement field, ClassElement classElement, ParseType parseType) {
+String _buildDescriptor(
+    FieldElement field, ClassElement classElement, ParseType parseType) {
   _validateFieldValidators(field, classElement);
   final resolvedKey = _resolveFieldMapKey(field, parseType);
   final fieldAnnotation = _encodeFieldAnnotationWithKey(field, resolvedKey);
@@ -277,18 +299,15 @@ void _validateFieldValidators(FieldElement field, ClassElement classElement) {
 }
 
 String _encodeValidators(FieldElement field) {
-  return field.metadata.where(AnnotationEncoder.isValidator).map(AnnotationEncoder.encode).whereType<String>().join(', ');
+  return field.metadata
+      .where(AnnotationEncoder.isValidator)
+      .map(AnnotationEncoder.encode)
+      .whereType<String>()
+      .join(', ');
 }
 
-bool _hasNullable(FieldElement field) {
-  // Check Dart's type system first (? suffix)
-  if (field.type.nullabilitySuffix == NullabilitySuffix.question) return true;
-  // Fallback to annotation for backward compatibility
-  return field.metadata.any((m) {
-    final source = m.toSource();
-    return source == '@ZNullable()' || source == '@ZNullable' || source == '@Nullable()' || source == '@Nullable';
-  });
-}
+bool _hasNullable(FieldElement field) =>
+    field.type.nullabilitySuffix == NullabilitySuffix.question;
 
 String? _getZtoFieldTypeName(FieldElement field) {
   for (final meta in field.metadata) {

@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 // ── Schemas (mirrors what zto_generator would produce) ──────────────────────
 
@@ -11,17 +9,20 @@ const $createProductDtoSchema = ZtoSchema(
   typeName: 'CreateProductDto',
   descriptors: [
     FieldDescriptor(
-      fieldAnnotation: ZString(mapKey: 'name', description: 'Product name', example: 'Widget'),
+      fieldAnnotation: ZString(
+          mapKey: 'name', description: 'Product name', example: 'Widget'),
       validators: [],
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZDouble(mapKey: 'price', description: 'Price in USD', example: 9.99),
+      fieldAnnotation:
+          ZDouble(mapKey: 'price', description: 'Price in USD', example: 9.99),
       validators: [ZPositive()],
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZEnum(mapKey: 'category', values: ['electronics', 'clothing', 'food']),
+      fieldAnnotation: ZEnum(
+          mapKey: 'category', values: ['electronics', 'clothing', 'food']),
       validators: [],
       isNullable: false,
     ),
@@ -54,30 +55,13 @@ const $productResponseDtoSchema = ZtoSchema(
   ],
 );
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-Directory _fakeRoutes() {
-  final dir = Directory.systemTemp.createTempSync('zto_test_');
-  File('${dir.path}/index.dart').writeAsStringSync(
-    'import "package:dart_frog/dart_frog.dart";\n'
-    'FutureOr<Response> onRequest(RequestContext c) {\n'
-    '  return switch (c.request.method) {\n'
-    '    HttpMethod.get => Response(),\n'
-    '    HttpMethod.post => Response(),\n'
-    '    _ => Response(statusCode: 405),\n'
-    '  };\n'
-    '}\n',
-  );
-  return dir;
-}
-
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 void main() {
   group('OpenApiBuilder with zto DTO schemas', () {
     test(r'requestBody uses $ref to components/schemas', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
@@ -91,13 +75,15 @@ void main() {
       final post = spec['paths']['/']['post'] as Map;
       expect(post.containsKey('requestBody'), isTrue);
 
-      final schema = post['requestBody']['content']['application/json']['schema'] as Map;
+      final schema =
+          post['requestBody']['content']['application/json']['schema'] as Map;
       expect(schema[r'$ref'], '#/components/schemas/CreateProductDto');
     });
 
-    test('components/schemas contains the DTO schema with correct properties', () {
+    test('components/schemas contains the DTO schema with correct properties',
+        () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
@@ -108,15 +94,18 @@ void main() {
         },
       ).build();
 
-      final componentSchema = spec['components']['schemas']['CreateProductDto'] as Map;
+      final componentSchema =
+          spec['components']['schemas']['CreateProductDto'] as Map;
       expect(componentSchema['type'], 'object');
-      expect((componentSchema['properties'] as Map).containsKey('name'), isTrue);
-      expect((componentSchema['properties'] as Map).containsKey('price'), isTrue);
+      expect(
+          (componentSchema['properties'] as Map).containsKey('name'), isTrue);
+      expect(
+          (componentSchema['properties'] as Map).containsKey('price'), isTrue);
     });
 
     test('required list excludes nullable fields from DTO', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
@@ -127,7 +116,8 @@ void main() {
         },
       ).build();
 
-      final componentSchema = spec['components']['schemas']['CreateProductDto'] as Map;
+      final componentSchema =
+          spec['components']['schemas']['CreateProductDto'] as Map;
       final required = componentSchema['required'] as List;
       expect(required, contains('name'));
       expect(required, isNot(contains('description')));
@@ -135,7 +125,7 @@ void main() {
 
     test('ZEnum field has enum values in schema', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
@@ -146,18 +136,21 @@ void main() {
         },
       ).build();
 
-      final componentSchema = spec['components']['schemas']['CreateProductDto'] as Map;
+      final componentSchema =
+          spec['components']['schemas']['CreateProductDto'] as Map;
       final props = componentSchema['properties'] as Map;
       expect(props['category']['enum'], ['electronics', 'clothing', 'food']);
     });
 
     test(r'response uses $ref to components/schemas', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             get: OperationSchema(
-              responseSchemas: {200: OpenApiSchema.fromZto($productResponseDtoSchema)},
+              responseSchemas: {
+                200: OpenApiSchema.fromZto($productResponseDtoSchema)
+              },
             ),
           ),
         },
@@ -167,35 +160,42 @@ void main() {
       final responses = get['responses'] as Map;
       expect(responses.containsKey('200'), isTrue);
 
-      final schema = responses['200']['content']['application/json']['schema'] as Map;
+      final schema =
+          responses['200']['content']['application/json']['schema'] as Map;
       expect(schema[r'$ref'], '#/components/schemas/ProductResponseDto');
     });
 
     test('components/schemas contains response DTO schema', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             get: OperationSchema(
-              responseSchemas: {200: OpenApiSchema.fromZto($productResponseDtoSchema)},
+              responseSchemas: {
+                200: OpenApiSchema.fromZto($productResponseDtoSchema)
+              },
             ),
           ),
         },
       ).build();
 
-      final componentSchema = spec['components']['schemas']['ProductResponseDto'] as Map;
+      final componentSchema =
+          spec['components']['schemas']['ProductResponseDto'] as Map;
       expect(componentSchema['type'], 'object');
       expect((componentSchema['properties'] as Map).containsKey('id'), isTrue);
     });
 
-    test('OperationSchema supports both requestBodySchema and responseSchemas', () {
+    test('OperationSchema supports both requestBodySchema and responseSchemas',
+        () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
               requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
-              responseSchemas: {201: OpenApiSchema.fromZto($productResponseDtoSchema)},
+              responseSchemas: {
+                201: OpenApiSchema.fromZto($productResponseDtoSchema)
+              },
             ),
           ),
         },
@@ -212,12 +212,14 @@ void main() {
 
     test('multiple DTOs across paths all appear in components/schemas', () {
       final spec = OpenApiBuilder(
-        info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+        info: const OpenApiInfo(title: 'Test'),
         pathSchemas: {
           '/': PathSchema(
             post: OperationSchema(
               requestBodySchema: OpenApiSchema.fromZto($createProductDtoSchema),
-              responseSchemas: {201: OpenApiSchema.fromZto($productResponseDtoSchema)},
+              responseSchemas: {
+                201: OpenApiSchema.fromZto($productResponseDtoSchema)
+              },
             ),
           ),
         },
@@ -237,7 +239,8 @@ void main() {
         typeName: 'BoolDto',
         descriptors: [
           FieldDescriptor(
-            fieldAnnotation: ZBool(mapKey: 'active', description: 'Active flag', example: true),
+            fieldAnnotation: ZBool(
+                mapKey: 'active', description: 'Active flag', example: true),
             validators: [],
             isNullable: false,
           ),
@@ -276,7 +279,8 @@ void main() {
         typeName: 'FileDto',
         descriptors: [
           FieldDescriptor(
-            fieldAnnotation: ZFile(mapKey: 'avatar', description: 'Profile image'),
+            fieldAnnotation:
+                ZFile(mapKey: 'avatar', description: 'Profile image'),
             validators: [],
             isNullable: false,
           ),
@@ -296,7 +300,8 @@ void main() {
         typeName: 'MetaDto',
         descriptors: [
           FieldDescriptor(
-            fieldAnnotation: ZMetaData(mapKey: 'meta', description: 'User metadata'),
+            fieldAnnotation:
+                ZMetaData(mapKey: 'meta', description: 'User metadata'),
             validators: [],
             isNullable: false,
           ),
@@ -310,7 +315,9 @@ void main() {
   });
 
   group('ZList field', () {
-    test('ZList with ZString itemType generates type: array, items: {type: string}', () {
+    test(
+        'ZList with ZString itemType generates type: array, items: {type: string}',
+        () {
       const schema = ZtoSchema(
         typeName: 'ListStringDto',
         descriptors: [
@@ -328,7 +335,9 @@ void main() {
       expect(props['tags']['items']['type'], 'string');
     });
 
-    test('ZList with ZInt itemType generates type: array, items: {type: integer}', () {
+    test(
+        'ZList with ZInt itemType generates type: array, items: {type: integer}',
+        () {
       const schema = ZtoSchema(
         typeName: 'ListIntDto',
         descriptors: [
@@ -345,7 +354,9 @@ void main() {
       expect(props['scores']['items']['type'], 'integer');
     });
 
-    test('ZList with ZBool itemType generates type: array, items: {type: boolean}', () {
+    test(
+        'ZList with ZBool itemType generates type: array, items: {type: boolean}',
+        () {
       const schema = ZtoSchema(
         typeName: 'ListBoolDto',
         descriptors: [
@@ -362,7 +373,9 @@ void main() {
       expect(props['flags']['items']['type'], 'boolean');
     });
 
-    test('ZList with ZDate itemType generates type: array, items with format: date-time', () {
+    test(
+        'ZList with ZDate itemType generates type: array, items with format: date-time',
+        () {
       const schema = ZtoSchema(
         typeName: 'ListDateDto',
         descriptors: [
@@ -382,7 +395,8 @@ void main() {
   });
 
   group('ZListOf field', () {
-    test('ZListOf without dtoSchema generates type: array with object items', () {
+    test('ZListOf without dtoSchema generates type: array with object items',
+        () {
       const schema = ZtoSchema(
         typeName: 'ListOfDto',
         descriptors: [
@@ -709,7 +723,8 @@ void main() {
         ],
       );
       final result = DtoToOpenApi.convert(schema);
-      expect(result['properties']['normalField'].containsKey('deprecated'), isFalse);
+      expect(result['properties']['normalField'].containsKey('deprecated'),
+          isFalse);
     });
 
     test('deprecated nullable field puts deprecated inside oneOf', () {
@@ -762,7 +777,9 @@ void main() {
       expect(() => DtoToOpenApi.convert(schemaB), returnsNormally);
     });
 
-    test('OpenApiBuilder._collectSchemas does not loop on mutually referencing DTOs', () {
+    test(
+        'OpenApiBuilder._collectSchemas does not loop on mutually referencing DTOs',
+        () {
       // A references B via ZObj, B references A via ZObj — would loop without seenTypeNames guard
       const schemaA = ZtoSchema(
         typeName: 'MutualA',
@@ -788,7 +805,7 @@ void main() {
       // Build spec — must not hang or throw StackOverflow
       expect(
         () => OpenApiBuilder(
-          info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+          info: const OpenApiInfo(title: 'Test'),
           pathSchemas: {
             '/': PathSchema(
               get: OperationSchema(

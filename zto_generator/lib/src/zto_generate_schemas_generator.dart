@@ -5,7 +5,8 @@ import 'package:zto/zto.dart';
 
 /// @deprecated @ZtoGenerateSchemas is no longer supported.
 /// Schema is now required in [Zto.parse(schema: $DtoSchema)].
-class ZtoGenerateSchemasGenerator extends GeneratorForAnnotation<ZtoGenerateSchemas> {
+class ZtoGenerateSchemasGenerator
+    extends GeneratorForAnnotation<ZtoGenerateSchemas> {
   const ZtoGenerateSchemasGenerator();
 
   @override

@@ -5,7 +5,10 @@ import 'package:zto/zto.dart';
 const _itemSchema = ZtoSchema(
   typeName: 'ItemDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'id'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
@@ -18,12 +21,10 @@ void main() {
               .tag('Items')
               .public()
               .query('page', ParamType.integer, example: 1)
-              .response(200, description: 'Success list')
-          )
+              .response(200, description: 'Success list'))
           .post((op) => op
               .summary('Create item')
-              .response(201, description: 'Created item')
-          )
+              .response(201, description: 'Created item'))
           .build();
 
       expect(pathSchema.get, isNotNull);
@@ -38,14 +39,16 @@ void main() {
 
       expect(pathSchema.post, isNotNull);
       expect(pathSchema.post!.summary, equals('Create item'));
-      expect(pathSchema.post!.responseDescriptions[201], equals('Created item'));
+      expect(
+          pathSchema.post!.responseDescriptions[201], equals('Created item'));
       expect(pathSchema.put, isNull);
     });
 
-    test('response com listOfZtoSchema define array responseSchema e descrição', () {
+    test('response com listOfZtoSchema define array responseSchema e descrição',
+        () {
       final pathSchema = Api.path()
-          .get((op) => op.summary('List items').response(
-              200, listOfZtoSchema: _itemSchema, description: 'Lista de itens'))
+          .get((op) => op.summary('List items').response(200,
+              listOfZtoSchema: _itemSchema, description: 'Lista de itens'))
           .build();
 
       final op = pathSchema.get!;
@@ -58,7 +61,8 @@ void main() {
       expect(items[r'$ref'], equals('#/components/schemas/ItemDto'));
     });
 
-    test('ok(listOfZtoSchema:) sem descrição deixa responseDescriptions vazio', () {
+    test('ok(listOfZtoSchema:) sem descrição deixa responseDescriptions vazio',
+        () {
       final pathSchema = Api.path()
           .get((op) => op.summary('X').ok(listOfZtoSchema: _itemSchema))
           .build();
@@ -90,7 +94,8 @@ void main() {
 
     test('json infere schema da resposta real e anexa example', () {
       final pathSchema = Api.path()
-          .get((op) => op.summary('Ping').ok(json: const {'pong': true, 'count': 3}))
+          .get((op) =>
+              op.summary('Ping').ok(json: const {'pong': true, 'count': 3}))
           .build();
 
       final schema = pathSchema.get!.responseSchemas[200]!;
@@ -105,29 +110,32 @@ void main() {
 
     test('listOfJson infere array do item e usa [item] como example', () {
       final pathSchema = Api.path()
-          .get((op) => op.summary('List').response(
-              200, listOfJson: const {'id': 'usr_1'}))
+          .get((op) => op
+              .summary('List')
+              .response(200, listOfJson: const {'id': 'usr_1'}))
           .build();
 
       final schema = pathSchema.get!.responseSchemas[200]!;
       expect(schema.isInline, isTrue);
       expect(schema.jsonSchema['type'], equals('array'));
       expect(schema.jsonSchema['items']['type'], equals('object'));
-      expect(schema.jsonSchema['items']['properties']['id']['type'], equals('string'));
-      expect(schema.jsonSchema['example'], equals([
-        {'id': 'usr_1'}
-      ]));
+      expect(schema.jsonSchema['items']['properties']['id']['type'],
+          equals('string'));
+      expect(
+          schema.jsonSchema['example'],
+          equals([
+            {'id': 'usr_1'}
+          ]));
     });
 
     test('created/noContent/badRequest mapeiam para os status corretos', () {
       final pathSchema = Api.path()
           .post((op) => op
-              .summary('Create')
-              .created(ztoSchema: _itemSchema, headers: const [
+                  .summary('Create')
+                  .created(ztoSchema: _itemSchema, headers: const [
                 ResHeader('Location', ParamType.string,
                     description: 'URL do recurso'),
-              ])
-              .badRequest(description: 'Dados inválidos'))
+              ]).badRequest(description: 'Dados inválidos'))
           .delete((op) => op.summary('Delete').noContent())
           .build();
 
@@ -142,7 +150,9 @@ void main() {
       expect(del.responseSchemas[204], isNull);
     });
 
-    test('accepted/tooManyRequests/serverError/serviceUnavailable mapeiam o status', () {
+    test(
+        'accepted/tooManyRequests/serverError/serviceUnavailable mapeiam o status',
+        () {
       final pathSchema = Api.path()
           .post((op) => op
               .accepted(ztoSchema: _itemSchema)
@@ -177,9 +187,8 @@ void main() {
       test('adds a required string query parameter', () {
         final pathSchema = Api.path()
             .get(
-              (op) => op
-                  .summary('Get me')
-                  .queryParam('user_id', description: 'ID do usuário', required: true),
+              (op) => op.summary('Get me').queryParam('user_id',
+                  description: 'ID do usuário', required: true),
             )
             .build();
 
@@ -202,9 +211,7 @@ void main() {
       test('accepts optional example', () {
         final pathSchema = Api.path()
             .get(
-              (op) => op
-                  .summary('X')
-                  .queryParam('page', example: '1'),
+              (op) => op.summary('X').queryParam('page', example: '1'),
             )
             .build();
 

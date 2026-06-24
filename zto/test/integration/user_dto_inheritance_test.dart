@@ -69,12 +69,10 @@ class UserDtoCreate extends UserDto with ZtoDto<UserDtoCreate> {
 class UserDtoUpdate extends UserDto with ZtoDto<UserDtoUpdate> {
   @ZString(mapKey: 'name')
   @ZMinLength(2)
-  @ZNullable()
   final String? name;
 
   @ZString(mapKey: 'email')
   @ZEmail()
-  @ZNullable()
   final String? email;
 
   const UserDtoUpdate({this.name, this.email});
@@ -107,28 +105,32 @@ void main() {
 
     test('throws when name is missing', () {
       expect(
-        () => $userDtoCreateSchema.parse({'email': 'alice@example.com'}, UserDtoCreate.fromMap),
+        () => $userDtoCreateSchema
+            .parse({'email': 'alice@example.com'}, UserDtoCreate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
 
     test('throws when email is missing', () {
       expect(
-        () => $userDtoCreateSchema.parse({'name': 'Alice'}, UserDtoCreate.fromMap),
+        () => $userDtoCreateSchema
+            .parse({'name': 'Alice'}, UserDtoCreate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
 
     test('throws when name is too short', () {
       expect(
-        () => $userDtoCreateSchema.parse({'name': 'A', 'email': 'alice@example.com'}, UserDtoCreate.fromMap),
+        () => $userDtoCreateSchema.parse(
+            {'name': 'A', 'email': 'alice@example.com'}, UserDtoCreate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
 
     test('throws when email is invalid', () {
       expect(
-        () => $userDtoCreateSchema.parse({'name': 'Alice', 'email': 'not-email'}, UserDtoCreate.fromMap),
+        () => $userDtoCreateSchema.parse(
+            {'name': 'Alice', 'email': 'not-email'}, UserDtoCreate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
@@ -151,27 +153,31 @@ void main() {
     });
 
     test('parses partial data (only name)', () {
-      final dto = $userDtoUpdateSchema.parse({'name': 'Alice'}, UserDtoUpdate.fromMap);
+      final dto =
+          $userDtoUpdateSchema.parse({'name': 'Alice'}, UserDtoUpdate.fromMap);
       expect(dto.name, 'Alice');
       expect(dto.email, isNull);
     });
 
     test('parses partial data (only email)', () {
-      final dto = $userDtoUpdateSchema.parse({'email': 'alice@example.com'}, UserDtoUpdate.fromMap);
+      final dto = $userDtoUpdateSchema
+          .parse({'email': 'alice@example.com'}, UserDtoUpdate.fromMap);
       expect(dto.name, isNull);
       expect(dto.email, 'alice@example.com');
     });
 
     test('validates when name is provided but too short', () {
       expect(
-        () => $userDtoUpdateSchema.parse({'name': 'A', 'email': 'alice@example.com'}, UserDtoUpdate.fromMap),
+        () => $userDtoUpdateSchema.parse(
+            {'name': 'A', 'email': 'alice@example.com'}, UserDtoUpdate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
 
     test('validates when email is provided but invalid', () {
       expect(
-        () => $userDtoUpdateSchema.parse({'name': 'Alice', 'email': 'not-email'}, UserDtoUpdate.fromMap),
+        () => $userDtoUpdateSchema.parse(
+            {'name': 'Alice', 'email': 'not-email'}, UserDtoUpdate.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });

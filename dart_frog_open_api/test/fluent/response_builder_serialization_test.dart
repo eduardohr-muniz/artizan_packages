@@ -1,27 +1,36 @@
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 // ── Schemas (espelham o que o zto_generator produziria) ─────────────────────
 
 const $userResponseDtoSchema = ZtoSchema(
   typeName: 'UserResponseDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'name'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'id'),
+        validators: [],
+        isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'name'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $userListItemDtoSchema = ZtoSchema(
   typeName: 'UserListItemDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'id'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 Map<String, dynamic> _specFor(PathSchema path) => OpenApiBuilder(
-      info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+      info: const OpenApiInfo(title: 'Test'),
       pathSchemas: {'/v1/users': path},
     ).build();
 
@@ -30,7 +39,8 @@ Map<String, dynamic> _op(Map<String, dynamic> spec, String method) =>
 
 void main() {
   group('ResponseBuilder → serialização OpenAPI', () {
-    test('response(ztoSchema) gera \$ref, descrição e registra o componente', () {
+    test('response(ztoSchema) gera \$ref, descrição e registra o componente',
+        () {
       final path = Api.path()
           .get((op) => op.public().response(
                 200,
@@ -68,7 +78,9 @@ void main() {
       expect(header['schema']['type'], equals('integer'));
     });
 
-    test('listOfZtoSchema referencia o wrapper de lista e registra item + lista', () {
+    test(
+        'listOfZtoSchema referencia o wrapper de lista e registra item + lista',
+        () {
       final path = Api.path()
           .get((op) => op.public().ok(listOfZtoSchema: $userListItemDtoSchema))
           .build();
@@ -78,9 +90,11 @@ void main() {
           ['application/json']['schema'] as Map;
 
       // O corpo referencia o componente de lista.
-      expect(schema[r'$ref'], equals('#/components/schemas/UserListItemDtoList'));
+      expect(
+          schema[r'$ref'], equals('#/components/schemas/UserListItemDtoList'));
 
-      final schemas = (spec['components']['schemas'] as Map).cast<String, dynamic>();
+      final schemas =
+          (spec['components']['schemas'] as Map).cast<String, dynamic>();
       // Tanto a lista quanto o item devem existir (sem $ref pendurado).
       expect(schemas.containsKey('UserListItemDtoList'), isTrue);
       expect(schemas.containsKey('UserListItemDto'), isTrue);
@@ -90,7 +104,9 @@ void main() {
           equals('#/components/schemas/UserListItemDto'));
     });
 
-    test('json(resposta real) emite schema inline inferido + example, sem componente', () {
+    test(
+        'json(resposta real) emite schema inline inferido + example, sem componente',
+        () {
       final path = Api.path()
           .get((op) => op.public().ok(json: const {'pong': true}))
           .build();
@@ -126,13 +142,12 @@ void main() {
           equals('#/components/schemas/UserResponseDto'));
       expect(res['headers']['Location']['schema']['type'], equals('string'));
       expect(res['headers']['Location']['schema']['format'], equals('uri'));
-      expect(res['headers']['Location']['description'], equals('URL do novo recurso'));
+      expect(res['headers']['Location']['description'],
+          equals('URL do novo recurso'));
     });
 
     test('noContent() gera 204 sem bloco content', () {
-      final path = Api.path()
-          .delete((op) => op.public().noContent())
-          .build();
+      final path = Api.path().delete((op) => op.public().noContent()).build();
 
       final res = _op(_specFor(path), 'delete')['responses']['204'] as Map;
       expect(res['description'], equals('No Content'));
@@ -159,17 +174,15 @@ void main() {
               ))
           .build();
 
-      final content = _op(_specFor(path), 'post')['responses']['422']['content']
-          as Map;
+      final content =
+          _op(_specFor(path), 'post')['responses']['422']['content'] as Map;
       expect(content.keys.single, equals('application/problem+json'));
       expect(content['application/problem+json']['schema'][r'$ref'],
           equals('#/components/schemas/UserResponseDto'));
     });
 
     test('serverError() serializa 500 com descrição padrão', () {
-      final path = Api.path()
-          .get((op) => op.public().serverError())
-          .build();
+      final path = Api.path().get((op) => op.public().serverError()).build();
 
       final res = _op(_specFor(path), 'get')['responses']['500'] as Map;
       expect(res['description'], equals('Internal Server Error'));

@@ -1,37 +1,55 @@
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 // ── Schemas (espelham o que o zto_generator produziria) ─────────────────────
 
 const $createUserDtoSchema = ZtoSchema(
   typeName: 'CreateUserDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'name'), validators: [], isNullable: false),
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'email'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'name'),
+        validators: [],
+        isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'email'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $userResponseDtoSchema = ZtoSchema(
   typeName: 'UserResponseDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'name'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'id'),
+        validators: [],
+        isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'name'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $orderEventDtoSchema = ZtoSchema(
   typeName: 'OrderEventDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'status'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'status'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $wsMessageDtoSchema = ZtoSchema(
   typeName: 'WsMessageDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'type'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'type'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
@@ -72,10 +90,12 @@ void main() {
               )
               .badRequest(description: 'Dados inválidos')
               .unprocessable(
-                  ztoSchema: $userResponseDtoSchema, description: 'Validação ZTO')
+                  ztoSchema: $userResponseDtoSchema,
+                  description: 'Validação ZTO')
               .conflict(description: 'E-mail já cadastrado')
               .postman('pm.test("201", () => pm.response.to.have.status(201));')
-              .bruno('test("201", () => expect(res.getStatus()).to.equal(201));'))
+              .bruno(
+                  'test("201", () => expect(res.getStatus()).to.equal(201));'))
           .build();
 
       final spec = _spec({'/v1/users': usersDoc});
@@ -84,17 +104,22 @@ void main() {
       final get = spec['paths']['/v1/users']['get'] as Map;
       expect(get['summary'], equals('Listar usuários'));
       expect((get['parameters'] as List).length, equals(3));
-      expect(get['responses']['200']['content']['application/json']['schema']
-          [r'$ref'], equals('#/components/schemas/UserResponseDtoList'));
-      expect(get['responses']['200']['headers']['X-Total-Count']['schema']
-          ['type'], equals('integer'));
+      expect(
+          get['responses']['200']['content']['application/json']['schema']
+              [r'$ref'],
+          equals('#/components/schemas/UserResponseDtoList'));
+      expect(
+          get['responses']['200']['headers']['X-Total-Count']['schema']['type'],
+          equals('integer'));
       expect(get['responses'].containsKey('401'), isTrue);
 
       // POST
       final post = spec['paths']['/v1/users']['post'] as Map;
-      expect(post['requestBody']['content']['application/json']['schema']
-          [r'$ref'], equals('#/components/schemas/CreateUserDto'));
-      expect(post['responses']['201']['headers']['Location']['schema']['format'],
+      expect(
+          post['requestBody']['content']['application/json']['schema'][r'$ref'],
+          equals('#/components/schemas/CreateUserDto'));
+      expect(
+          post['responses']['201']['headers']['Location']['schema']['format'],
           equals('uri'));
       expect(post['responses'].containsKey('400'), isTrue);
       expect(post['responses'].containsKey('422'), isTrue);
@@ -128,8 +153,10 @@ void main() {
 
       final spec = _spec({'/v1/users/{id}': doc});
       final get = spec['paths']['/v1/users/{id}']['get'] as Map;
-      expect(get['responses']['200']['content']['application/json']['schema']
-          [r'$ref'], equals('#/components/schemas/UserResponseDto'));
+      expect(
+          get['responses']['200']['content']['application/json']['schema']
+              [r'$ref'],
+          equals('#/components/schemas/UserResponseDto'));
       expect(get['responses'].containsKey('404'), isTrue);
       expect(get['responses']['500']['description'],
           equals('Internal Server Error'));
@@ -142,9 +169,9 @@ void main() {
     test('respostas com json/listOfJson (schema inferido + example)', () {
       final doc = Api.path()
           .get((op) => op
-              .summary('Health & métricas')
-              .public()
-              .response(200, json: const {
+                  .summary('Health & métricas')
+                  .public()
+                  .response(200, json: const {
                 'status': 'ok',
                 'uptime': 1234,
                 'healthy': true,
@@ -157,7 +184,8 @@ void main() {
       expect(schema['properties']['status']['type'], equals('string'));
       expect(schema['properties']['uptime']['type'], equals('integer'));
       expect(schema['properties']['healthy']['type'], equals('boolean'));
-      expect(schema['example'], equals({'status': 'ok', 'uptime': 1234, 'healthy': true}));
+      expect(schema['example'],
+          equals({'status': 'ok', 'uptime': 1234, 'healthy': true}));
     });
 
     // ── 4. Mídia: download binário + erro tipado (problem+json) ─────────────
@@ -167,17 +195,23 @@ void main() {
               .summary('Baixar fatura em PDF')
               .tag('Billing')
               .public()
-              .bytes(200, contentType: 'application/pdf', description: 'PDF da fatura')
+              .bytes(200,
+                  contentType: 'application/pdf', description: 'PDF da fatura')
               .response(404,
-                  json: const {'type': 'not_found', 'title': 'Fatura não existe'},
+                  json: const {
+                    'type': 'not_found',
+                    'title': 'Fatura não existe'
+                  },
                   contentType: 'application/problem+json',
                   description: 'Não encontrada'))
           .build();
 
       final get = _spec({'/v1/invoices/{id}/pdf': doc})['paths']
           ['/v1/invoices/{id}/pdf']['get'] as Map;
-      expect(get['responses']['200']['content']['application/pdf']['schema']
-          ['format'], equals('binary'));
+      expect(
+          get['responses']['200']['content']['application/pdf']['schema']
+              ['format'],
+          equals('binary'));
       expect(get['responses']['404']['content'].keys.single,
           equals('application/problem+json'));
     });
@@ -195,7 +229,8 @@ void main() {
 
       final body = _spec({'/v1/media/logo': doc})['paths']['/v1/media/logo']
           ['post']['requestBody'] as Map;
-      expect(body['content']['image/png']['schema']['format'], equals('binary'));
+      expect(
+          body['content']['image/png']['schema']['format'], equals('binary'));
     });
 
     // ── 6. Stream de eventos (SSE) ──────────────────────────────────────────
@@ -205,11 +240,13 @@ void main() {
               .summary('Stream de eventos do pedido')
               .tag('Orders')
               .public()
-              .sse(200, ztoSchema: $orderEventDtoSchema, description: 'Eventos'))
+              .sse(200,
+                  ztoSchema: $orderEventDtoSchema, description: 'Eventos'))
           .build();
 
       final content = _spec({'/v1/orders/{id}/events': doc})['paths']
-          ['/v1/orders/{id}/events']['get']['responses']['200']['content'] as Map;
+              ['/v1/orders/{id}/events']['get']['responses']['200']['content']
+          as Map;
       expect(content.containsKey('text/event-stream'), isTrue);
       expect(content['text/event-stream']['schema'][r'$ref'],
           equals('#/components/schemas/OrderEventDto'));
@@ -241,6 +278,6 @@ void main() {
 }
 
 Map<String, dynamic> _spec(Map<String, PathSchema> paths) => OpenApiBuilder(
-      info: const OpenApiInfo(title: 'Showcase API', version: '1.0.0'),
+      info: const OpenApiInfo(title: 'Showcase API'),
       pathSchemas: paths,
     ).build();

@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart';
-import 'package:build_test/build_test.dart' show testBuilder, testBuilders, decodedMatches;
-import 'package:matcher/matcher.dart';
+import 'package:build_test/build_test.dart'
+    show testBuilder, testBuilders;
 import 'package:test/test.dart';
 import 'package:zto_generator/zto_generator.dart';
 
@@ -21,12 +21,15 @@ class _DecodedMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('decoded UTF-8 that ').addDescriptionOf(_inner);
+  Description describe(Description description) =>
+      description.add('decoded UTF-8 that ').addDescriptionOf(_inner);
 
   @override
-  Description describeMismatch(item, Description mismatchDescription, Map matchState, bool verbose) {
+  Description describeMismatch(
+      item, Description mismatchDescription, Map matchState, bool verbose) {
     final decoded = utf8.decode(item as List<int>);
-    return _inner.describeMismatch(decoded, mismatchDescription, matchState, verbose);
+    return _inner.describeMismatch(
+        decoded, mismatchDescription, matchState, verbose);
   }
 }
 
@@ -61,10 +64,6 @@ class ZtoSchema extends ZtoSchemaBase {
 }
 
 mixin ZtoDto<T> {}
-
-class ZNullable {
-  const ZNullable();
-}
 
 abstract class ZtoField {
   const ZtoField(this.key, {this.description, this.example, this.failMessage});
@@ -217,7 +216,8 @@ export 'src/core/zto_exception.dart';
 Map<String, String> _ztoSources() => {
       'zto|lib/zto.dart': _ztoBarrelStub,
       'zto|lib/src/annotations/field_annotations.dart': _fieldAnnotationsStub,
-      'zto|lib/src/annotations/validator_annotations.dart': _validatorAnnotationsStub,
+      'zto|lib/src/annotations/validator_annotations.dart':
+          _validatorAnnotationsStub,
       'zto|lib/src/reflection/field_descriptor.dart': _fieldDescriptorStub,
       'zto|lib/src/core/zto_exception.dart': _ztoExceptionStub,
     };
@@ -278,10 +278,6 @@ class ZtoSchema extends ZtoSchemaBase {
 }
 
 mixin ZtoDto<T> {}
-
-class ZNullable {
-  const ZNullable();
-}
 
 abstract class ZtoField {
   const ZtoField({this.mapKey, this.description, this.example, this.failMessage});
@@ -376,8 +372,10 @@ class FieldDescriptor {
 
 Map<String, String> _zdtoSources() => {
       'zto|lib/zto.dart': _ztoBarrelStub,
-      'zto|lib/src/annotations/field_annotations.dart': _newFieldAnnotationsStub,
-      'zto|lib/src/annotations/validator_annotations.dart': _validatorAnnotationsStub,
+      'zto|lib/src/annotations/field_annotations.dart':
+          _newFieldAnnotationsStub,
+      'zto|lib/src/annotations/validator_annotations.dart':
+          _validatorAnnotationsStub,
       'zto|lib/src/reflection/field_descriptor.dart': _newFieldDescriptorStub,
       'zto|lib/src/core/zto_exception.dart': _ztoExceptionStub,
     };
@@ -427,7 +425,9 @@ class CreateUserDto with ZtoDto<CreateUserDto> {
     });
 
     group('UserDto inheritance (Create vs Update)', () {
-      test('generates UserDtoCreate with isNullable: false and UserDtoUpdate with isNullable: true', () async {
+      test(
+          'generates UserDtoCreate with isNullable: false and UserDtoUpdate with isNullable: true',
+          () async {
         await testBuilder(
           ztoBuilder(BuilderOptions.empty),
           {
@@ -452,8 +452,8 @@ class UserDtoCreate extends UserDto with ZtoDto<UserDtoCreate> {
 
 @Dto(description: 'Update user')
 class UserDtoUpdate extends UserDto with ZtoDto<UserDtoUpdate> {
-  @ZString('name') @ZMinLength(2) @ZNullable() final String? name;
-  @ZString('email') @ZEmail() @ZNullable() final String? email;
+  @ZString('name') @ZMinLength(2) final String? name;
+  @ZString('email') @ZEmail() final String? email;
 
   const UserDtoUpdate({this.name, this.email});
 
@@ -481,7 +481,7 @@ class UserDtoUpdate extends UserDto with ZtoDto<UserDtoUpdate> {
     });
 
     group('DTO with nullable field', () {
-      test('generates isNullable: true for @ZNullable fields', () async {
+      test('generates isNullable: true for nullable (?) fields', () async {
         await testBuilder(
           ztoBuilder(BuilderOptions.empty),
           {
@@ -494,7 +494,6 @@ part 'profile_dto.g.dart';
 @Dto(description: 'Profile')
 class ProfileDto {
   @ZString('bio')
-  @ZNullable()
   final String? bio;
 
   @ZInt('score')
@@ -573,7 +572,8 @@ class TagsDto {
     });
 
     group('DTO with description and example on field', () {
-      test('generates annotation with description and example params', () async {
+      test('generates annotation with description and example params',
+          () async {
         await testBuilder(
           ztoBuilder(BuilderOptions.empty),
           {
@@ -603,7 +603,8 @@ class OrderDto {
     });
 
     group('invalid validator on field type', () {
-      test('fails build with clear error when @ZEmail is used on @ZDouble', () async {
+      test('fails build with clear error when @ZEmail is used on @ZDouble',
+          () async {
         final result = await testBuilder(
           ztoBuilder(BuilderOptions.empty),
           {
@@ -689,7 +690,8 @@ class UserResponseDto {
       );
     });
 
-    test('snakeCase: camelCase field names converted to snake_case mapKeys', () async {
+    test('snakeCase: camelCase field names converted to snake_case mapKeys',
+        () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -768,7 +770,8 @@ class UserDto {
       );
     });
 
-    test('kebabCase: camelCase field names converted to kebab-case mapKeys', () async {
+    test('kebabCase: camelCase field names converted to kebab-case mapKeys',
+        () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -803,7 +806,8 @@ class UserDto {
       );
     });
 
-    test('explicit mapKey on annotation overrides ParseType inference', () async {
+    test('explicit mapKey on annotation overrides ParseType inference',
+        () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -836,7 +840,8 @@ class UserDto {
   });
 
   group('@ZModel', () {
-    test('gera \$XModelSchema (ZtoSchema) para uma classe anotada com @ZModel', () async {
+    test('gera \$XModelSchema (ZtoSchema) para uma classe anotada com @ZModel',
+        () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -855,7 +860,6 @@ class UserModel {
   final DateTime createdAt;
 
   @ZString()
-  @ZNullable()
   final String? lastName;
 
   const UserModel({required this.userId, required this.createdAt, this.lastName});
@@ -876,7 +880,9 @@ class UserModel {
       );
     });
 
-    test('schema gerado por @ZModel é idêntico ao gerado por @ZEntity para a mesma classe', () async {
+    test(
+        'schema gerado por @ZModel é idêntico ao gerado por @ZEntity para a mesma classe',
+        () async {
       // Ambas as anotações delegam a generateSchemaForClass, logo produzem o
       // mesmo ZtoSchema (typeName + descriptors) para a mesma classe.
       const modelSource = r'''
@@ -890,7 +896,6 @@ class Sample {
   final String name;
 
   @ZInt()
-  @ZNullable()
   final int? age;
 
   const Sample({required this.name, this.age});
@@ -908,7 +913,6 @@ class Sample {
   final String name;
 
   @ZInt()
-  @ZNullable()
   final int? age;
 
   const Sample({required this.name, this.age});
@@ -938,7 +942,9 @@ class Sample {
       );
     });
 
-    test('@ZModel com ParseType.snakeCase converte camelCase em snake_case nos mapKeys', () async {
+    test(
+        '@ZModel com ParseType.snakeCase converte camelCase em snake_case nos mapKeys',
+        () async {
       // Espelho de tabela usa colunas snake_case: garante que @ZModel honra o
       // parseType exatamente como @ZEntity/@ZDto (trava o fix em _getParseType).
       await testBuilder(
@@ -1104,7 +1110,7 @@ class OrderDto {
       );
     });
 
-    test('@ZObject with @ZNullable generates isNullable: true', () async {
+    test('@ZObject with nullable (?) type generates isNullable: true', () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -1119,7 +1125,6 @@ class AddressDto {}
 @ZDto(description: 'Order')
 class OrderDto {
   @ZObject()
-  @ZNullable()
   final AddressDto? address;
 
   @ZObject()
@@ -1270,7 +1275,7 @@ class TeamDto {
       );
     });
 
-    test('@ZList with @ZNullable generates isNullable: true', () async {
+    test('@ZList with nullable (?) type generates isNullable: true', () async {
       await testBuilder(
         ztoBuilder(BuilderOptions.empty),
         {
@@ -1283,7 +1288,6 @@ part 'post_dto.g.dart';
 @ZDto(description: 'Post')
 class PostDto {
   @ZList(itemType: ZString)
-  @ZNullable()
   final List<String>? tags;
 
   @ZList(itemType: ZInt)
@@ -1408,7 +1412,8 @@ class TeamDto {
   });
 
   group('ZtoDtosGenerator', () {
-    test(r'generates $ZtoSchemas from @ZtoDtos with DTOs that have fromMap', () async {
+    test(r'generates $ZtoSchemas from @ZtoDtos with DTOs that have fromMap',
+        () async {
       await testBuilders(
         [ztoBuilder(BuilderOptions.empty)],
         {
@@ -1440,7 +1445,7 @@ class CreateUserDto with ZtoDto<CreateUserDto> {
 
 @Dto(description: 'Update user')
 class UpdateUserDto with ZtoDto<UpdateUserDto> {
-  @ZString('name') @ZNullable() final String? name;
+  @ZString('name') final String? name;
 
   const UpdateUserDto({this.name});
 
@@ -1450,7 +1455,8 @@ class UpdateUserDto with ZtoDto<UpdateUserDto> {
 ''',
         },
         outputs: {
-          'pkg|lib/dtos/user_dto.g.dart': decodedMatches(contains('CreateUserDto')),
+          'pkg|lib/dtos/user_dto.g.dart':
+              decodedMatches(contains('CreateUserDto')),
           'pkg|lib/dtos/zto.g.dart': decodedMatches(allOf([
             contains(r'const List<ZtoSchemaRegistration> $ZtoSchemas = ['),
             contains('(CreateUserDto, \$CreateUserDtoSchema)'),
@@ -1460,7 +1466,9 @@ class UpdateUserDto with ZtoDto<UpdateUserDto> {
       );
     });
 
-    test(r'excludes DTOs without fromMap from $ZtoSchemas but generates all schemas', () async {
+    test(
+        r'excludes DTOs without fromMap from $ZtoSchemas but generates all schemas',
+        () async {
       await testBuilders(
         [ztoBuilder(BuilderOptions.empty)],
         {
@@ -1495,7 +1503,8 @@ class ResponseDto {
 ''',
         },
         outputs: {
-          'pkg|lib/dtos/create_dto.g.dart': decodedMatches(contains('CreateDto')),
+          'pkg|lib/dtos/create_dto.g.dart':
+              decodedMatches(contains('CreateDto')),
           'pkg|lib/dtos/zto.g.dart': decodedMatches(allOf([
             contains(r'$CreateDtoSchema'),
             contains(r'$ResponseDtoSchema'),
@@ -1506,7 +1515,8 @@ class ResponseDto {
       );
     });
 
-    test(r'generates schemas with empty $ZtoSchemas when no DTOs have fromMap', () async {
+    test(r'generates schemas with empty $ZtoSchemas when no DTOs have fromMap',
+        () async {
       await testBuilders(
         [ztoBuilder(BuilderOptions.empty)],
         {
@@ -1533,7 +1543,8 @@ class UserResponseDto {
 ''',
         },
         outputs: {
-          'pkg|lib/dtos/response_dto.g.dart': decodedMatches(contains('UserResponseDto')),
+          'pkg|lib/dtos/response_dto.g.dart':
+              decodedMatches(contains('UserResponseDto')),
           'pkg|lib/dtos/zto.g.dart': decodedMatches(allOf([
             contains(r'$UserResponseDtoSchema'),
             contains('(UserResponseDto, \$UserResponseDtoSchema)'),

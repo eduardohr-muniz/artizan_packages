@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-06-23
+
+### Removed
+
+- **BREAKING:** `@ZNullable()` and `@Nullable()` annotations. Nullability is now
+  inferred exclusively from Dart's `?` type suffix — declare the field as
+  nullable (e.g. `final String? name;`) instead.
+
 ## [0.1.0] - 2025-03-14
 
 ### Added

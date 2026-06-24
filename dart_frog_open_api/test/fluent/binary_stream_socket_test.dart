@@ -1,24 +1,30 @@
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 const $wsMessageDtoSchema = ZtoSchema(
   typeName: 'WsMessageDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'type'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'type'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $orderEventDtoSchema = ZtoSchema(
   typeName: 'OrderEventDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'status'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'status'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 Map<String, dynamic> _specFor(PathSchema path) => OpenApiBuilder(
-      info: const OpenApiInfo(title: 'Test', version: '1.0.0'),
+      info: const OpenApiInfo(title: 'Test'),
       pathSchemas: {'/v1/stream': path},
     ).build();
 
@@ -30,12 +36,10 @@ void main() {
     // ── RESPONSE ──────────────────────────────────────────────────────────
 
     test('response.bytes() gera octet-stream com schema binário', () {
-      final path = Api.path()
-          .get((op) => op.public().bytes(200))
-          .build();
+      final path = Api.path().get((op) => op.public().bytes(200)).build();
 
-      final media = _op(_specFor(path), 'get')['responses']['200']['content']
-          as Map;
+      final media =
+          _op(_specFor(path), 'get')['responses']['200']['content'] as Map;
       expect(media.containsKey('application/octet-stream'), isTrue);
       final schema = media['application/octet-stream']['schema'] as Map;
       expect(schema['type'], equals('string'));
@@ -47,12 +51,13 @@ void main() {
           .get((op) => op.public().bytes(200, contentType: 'application/pdf'))
           .build();
 
-      final content = _op(_specFor(path), 'get')['responses']['200']['content']
-          as Map;
+      final content =
+          _op(_specFor(path), 'get')['responses']['200']['content'] as Map;
       expect(content.keys.single, equals('application/pdf'));
     });
 
-    test('response.sse(ztoSchema) gera text/event-stream com \$ref do evento', () {
+    test('response.sse(ztoSchema) gera text/event-stream com \$ref do evento',
+        () {
       final path = Api.path()
           .get((op) => op.public().sse(200, ztoSchema: $orderEventDtoSchema))
           .build();
@@ -63,19 +68,19 @@ void main() {
       expect(content['text/event-stream']['schema'][r'$ref'],
           equals('#/components/schemas/OrderEventDto'));
       // Evento tipado é registrado como componente.
-      expect((spec['components']['schemas'] as Map).containsKey('OrderEventDto'),
+      expect(
+          (spec['components']['schemas'] as Map).containsKey('OrderEventDto'),
           isTrue);
     });
 
     test('response.sse() sem schema emite content-type sem schema', () {
-      final path = Api.path()
-          .get((op) => op.public().sse(200))
-          .build();
+      final path = Api.path().get((op) => op.public().sse(200)).build();
 
-      final content = _op(_specFor(path), 'get')['responses']['200']['content']
-          as Map;
+      final content =
+          _op(_specFor(path), 'get')['responses']['200']['content'] as Map;
       expect(content.containsKey('text/event-stream'), isTrue);
-      expect((content['text/event-stream'] as Map).containsKey('schema'), isFalse);
+      expect(
+          (content['text/event-stream'] as Map).containsKey('schema'), isFalse);
     });
 
     // ── REQUEST ───────────────────────────────────────────────────────────
@@ -92,7 +97,8 @@ void main() {
       expect(schema['format'], equals('binary'));
     });
 
-    test('streamBody(ztoSchema) gera ndjson com \$ref e registra componente', () {
+    test('streamBody(ztoSchema) gera ndjson com \$ref e registra componente',
+        () {
       final path = Api.path()
           .post((op) => op
               .public()
@@ -106,13 +112,15 @@ void main() {
       expect(content.containsKey('application/x-ndjson'), isTrue);
       expect(content['application/x-ndjson']['schema'][r'$ref'],
           equals('#/components/schemas/OrderEventDto'));
-      expect((spec['components']['schemas'] as Map).containsKey('OrderEventDto'),
+      expect(
+          (spec['components']['schemas'] as Map).containsKey('OrderEventDto'),
           isTrue);
     });
 
     // ── WEBSOCKET ─────────────────────────────────────────────────────────
 
-    test('websocket() gera 101 + x-websocket e registra schema de mensagem', () {
+    test('websocket() gera 101 + x-websocket e registra schema de mensagem',
+        () {
       final path = Api.path()
           .get((op) => op.public().websocket(
                 messageZtoSchema: $wsMessageDtoSchema,
@@ -128,16 +136,15 @@ void main() {
       expect(res101.containsKey('content'), isFalse);
 
       final ws = get['x-websocket'] as Map;
-      expect(ws['message'][r'$ref'], equals('#/components/schemas/WsMessageDto'));
+      expect(
+          ws['message'][r'$ref'], equals('#/components/schemas/WsMessageDto'));
 
       expect((spec['components']['schemas'] as Map).containsKey('WsMessageDto'),
           isTrue);
     });
 
     test('websocket() sem schema usa descrição padrão do 101', () {
-      final path = Api.path()
-          .get((op) => op.public().websocket())
-          .build();
+      final path = Api.path().get((op) => op.public().websocket()).build();
 
       final res101 = _op(_specFor(path), 'get')['responses']['101'] as Map;
       expect(res101['description'], equals('Switching Protocols'));

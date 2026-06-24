@@ -9,8 +9,11 @@ import 'package:zto/zto.dart';
 enum _SimpleRole { admin, viewer }
 
 // Enhanced enum with fields — mirrors AppLocaleCode, the real bug trigger.
+// Names intentionally mirror the real locale codes (BR/GB).
 enum _LocaleCode {
+  // ignore: constant_identifier_names
   BR(currency: 'BRL', symbol: r'R$'),
+  // ignore: constant_identifier_names
   GB(currency: 'GBP', symbol: '£');
 
   const _LocaleCode({required this.currency, required this.symbol});
@@ -24,12 +27,14 @@ const $fullUserDtoSchema = ZtoSchema(
   typeName: 'FullUserDto',
   descriptors: [
     FieldDescriptor(
-      fieldAnnotation: ZString(mapKey: 'name', description: 'Full name', example: 'Alice'),
+      fieldAnnotation:
+          ZString(mapKey: 'name', description: 'Full name', example: 'Alice'),
       validators: [],
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZInt(mapKey: 'age', description: 'Age in years', example: 25),
+      fieldAnnotation:
+          ZInt(mapKey: 'age', description: 'Age in years', example: 25),
       validators: [ZMin(18)],
       isNullable: false,
     ),
@@ -54,7 +59,10 @@ const $fullUserDtoSchema = ZtoSchema(
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZEnum(mapKey: 'role', values: ['admin', 'viewer'], description: 'User role'),
+      fieldAnnotation: ZEnum(
+          mapKey: 'role',
+          values: ['admin', 'viewer'],
+          description: 'User role'),
       validators: [],
       isNullable: false,
     ),
@@ -64,7 +72,8 @@ const $fullUserDtoSchema = ZtoSchema(
       isNullable: true,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZList(mapKey: 'tags', itemType: ZString, description: 'Tags'),
+      fieldAnnotation:
+          ZList(mapKey: 'tags', itemType: ZString, description: 'Tags'),
       validators: [],
       isNullable: false,
     ),
@@ -142,7 +151,8 @@ void main() {
       late Map<String, dynamic> props;
 
       setUpAll(() {
-        props = (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map).cast();
+        props = (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map)
+            .cast();
       });
 
       test('ZString -> type: string', () {
@@ -182,32 +192,38 @@ void main() {
             typeName: 'RoleDto',
             descriptors: [
               FieldDescriptor(
-                fieldAnnotation: ZEnum(mapKey: 'role', values: _SimpleRole.values),
+                fieldAnnotation:
+                    ZEnum(mapKey: 'role', values: _SimpleRole.values),
                 validators: [],
                 isNullable: false,
               ),
             ],
           ),
         );
-        final enumValues = (schema['properties'] as Map)['role']['enum'] as List;
+        final enumValues =
+            (schema['properties'] as Map)['role']['enum'] as List;
         expect(enumValues, ['admin', 'viewer']);
         expect(enumValues.every((e) => e is String), isTrue);
       });
 
-      test('ZEnum with enhanced Dart enum (with fields) emits name strings and is JSON-serializable', () {
+      test(
+          'ZEnum with enhanced Dart enum (with fields) emits name strings and is JSON-serializable',
+          () {
         final schema = DtoToOpenApi.convert(
           const ZtoSchema(
             typeName: 'LocaleDto',
             descriptors: [
               FieldDescriptor(
-                fieldAnnotation: ZEnum(mapKey: 'locale', values: _LocaleCode.values),
+                fieldAnnotation:
+                    ZEnum(mapKey: 'locale', values: _LocaleCode.values),
                 validators: [],
                 isNullable: false,
               ),
             ],
           ),
         );
-        final enumValues = (schema['properties'] as Map)['locale']['enum'] as List;
+        final enumValues =
+            (schema['properties'] as Map)['locale']['enum'] as List;
         expect(enumValues, ['BR', 'GB']);
         expect(enumValues.every((e) => e is String), isTrue);
         // Must be JSON-encodable (was the original bug).
@@ -221,7 +237,8 @@ void main() {
     });
 
     group('ZListOf nested DTO + minItems', () {
-      test('ZListOf(dtoSchema: …) emits array with \$ref items and minItems: 1', () {
+      test('ZListOf(dtoSchema: …) emits array with \$ref items and minItems: 1',
+          () {
         final schema = DtoToOpenApi.convert($orderWithLinesDtoSchema);
         final props = (schema['properties'] as Map).cast<String, dynamic>();
         final lines = props['lines'] as Map<String, dynamic>;
@@ -260,7 +277,9 @@ void main() {
 
     group('nullable fields', () {
       test('nullable field uses oneOf with null type', () {
-        final props = (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map).cast<String, dynamic>();
+        final props =
+            (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map)
+                .cast<String, dynamic>();
         final email = props['email'] as Map;
         expect(email.containsKey('oneOf'), isTrue);
         final oneOf = email['oneOf'] as List;
@@ -271,17 +290,23 @@ void main() {
 
     group('description and example', () {
       test('description is included in property when present', () {
-        final props = (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map).cast<String, dynamic>();
+        final props =
+            (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map)
+                .cast<String, dynamic>();
         expect(props['name']['description'], 'Full name');
       });
 
       test('example is included in property when present', () {
-        final props = (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map).cast<String, dynamic>();
+        final props =
+            (DtoToOpenApi.convert($fullUserDtoSchema)['properties'] as Map)
+                .cast<String, dynamic>();
         expect(props['name']['example'], 'Alice');
       });
 
       test('description is absent when not provided', () {
-        final props = (DtoToOpenApi.convert($minimalDtoSchema)['properties'] as Map).cast<String, dynamic>();
+        final props =
+            (DtoToOpenApi.convert($minimalDtoSchema)['properties'] as Map)
+                .cast<String, dynamic>();
         expect(props['title'].containsKey('description'), isFalse);
       });
     });

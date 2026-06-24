@@ -1,4 +1,4 @@
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
@@ -57,7 +57,8 @@ void main() {
       expect(schema.typeName, equals('TestDto'));
     });
 
-    test('fromZto returns jsonSchema with type object, properties, required', () {
+    test('fromZto returns jsonSchema with type object, properties, required',
+        () {
       final schema = OpenApiSchema.fromZto(_testZtoSchema);
       expect(schema.jsonSchema['type'], equals('object'));
       expect(schema.jsonSchema['properties'], isA<Map<String, dynamic>>());

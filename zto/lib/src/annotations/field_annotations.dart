@@ -32,7 +32,12 @@ enum ParseType {
 /// or omit it so the generator can infer it from the field name and the DTO's
 /// [ParseType]. When neither is provided, [key] returns an empty string.
 abstract class ZtoField {
-  const ZtoField({this.mapKey, this.description, this.example, this.failMessage, this.deprecated = false});
+  const ZtoField(
+      {this.mapKey,
+      this.description,
+      this.example,
+      this.failMessage,
+      this.deprecated = false});
 
   /// Explicit JSON map key for this field. Takes precedence over inference.
   final String? mapKey;
@@ -92,7 +97,12 @@ class ZString extends ZtoField {
   /// @ZSlug()         // 'my-blog-post' -> passed | 'Invalid Slug!' -> fail
   /// @ZAlphanumeric() // 'abc123' -> passed | 'abc-123' -> fail
   /// ```
-  const ZString({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZString(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZInt extends ZtoField {
@@ -122,7 +132,12 @@ class ZInt extends ZtoField {
   /// @ZFinite()       // 42 -> passed | infinity, nan -> fail
   /// @ZSafeInt()      // 9007199254740991 -> passed | 9007199254740992 -> fail
   /// ```
-  const ZInt({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZInt(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZDouble extends ZtoField {
@@ -139,7 +154,12 @@ class ZDouble extends ZtoField {
   /// ```
   ///
   /// Available validators: same as [ZInt].
-  const ZDouble({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZDouble(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZNum extends ZtoField {
@@ -156,7 +176,12 @@ class ZNum extends ZtoField {
   /// ```
   ///
   /// Available validators: same as [ZInt].
-  const ZNum({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZNum(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZBool extends ZtoField {
@@ -169,7 +194,12 @@ class ZBool extends ZtoField {
   /// @ZBool(description: 'Whether the item is active')
   /// final bool active;
   /// ```
-  const ZBool({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZBool(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZMap extends ZtoField {
@@ -182,7 +212,12 @@ class ZMap extends ZtoField {
   /// @ZMap(description: 'Additional metadata')
   /// final Map<String, dynamic> metadata;
   /// ```
-  const ZMap({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZMap(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZDate extends ZtoField {
@@ -203,7 +238,12 @@ class ZDate extends ZtoField {
   /// @ZMin(timestamp)  // date >= min -> passed | date < min -> fail
   /// @ZMax(timestamp)  // date <= max -> passed | date > max -> fail
   /// ```
-  const ZDate({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZDate(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZFile extends ZtoField {
@@ -216,7 +256,12 @@ class ZFile extends ZtoField {
   /// @ZFile(description: 'Profile image')
   /// final dynamic avatar;
   /// ```
-  const ZFile({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZFile(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 class ZEnum<T> extends ZtoField {
@@ -229,7 +274,13 @@ class ZEnum<T> extends ZtoField {
   /// @ZEnum(values: ['admin', 'editor', 'viewer'])
   /// final String role;
   /// ```
-  const ZEnum({required this.values, super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZEnum(
+      {required this.values,
+      super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 
   /// The list of allowed string values.
   final List<T> values;
@@ -246,7 +297,13 @@ class ZList extends ZtoField {
   /// @ZList(itemType: ZString, description: 'List of tags')
   /// final List<String> tags;
   /// ```
-  const ZList({required this.itemType, super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZList(
+      {required this.itemType,
+      super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 
   /// The [ZtoField] type of each item in the list.
   final Type itemType;
@@ -265,7 +322,14 @@ class ZListOf extends ZtoField {
   /// @ZListOf(dtoType: AddressDto)
   /// final List<AddressDto> addresses;
   /// ```
-  const ZListOf({this.dtoSchema, this.dtoType, super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZListOf(
+      {this.dtoSchema,
+      this.dtoType,
+      super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 
   /// The [ZtoSchemaBase] for each item in the list.
   final ZtoSchemaBase? dtoSchema;
@@ -286,7 +350,14 @@ class ZObj extends ZtoField {
   /// @ZObj(dtoType: AddressDto)
   /// final AddressDto address;
   /// ```
-  const ZObj({this.dtoSchema, this.dtoType, super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZObj(
+      {this.dtoSchema,
+      this.dtoType,
+      super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 
   /// The [ZtoSchemaBase] for the nested object.
   final ZtoSchemaBase? dtoSchema;
@@ -306,7 +377,12 @@ class ZMetaData extends ZtoField {
   /// @ZMetaData(description: 'User metadata', example: {'plan': 'pro'})
   /// final Map<String, dynamic> metaData;
   /// ```
-  const ZMetaData({super.mapKey, super.description, super.example, super.failMessage, super.deprecated});
+  const ZMetaData(
+      {super.mapKey,
+      super.description,
+      super.example,
+      super.failMessage,
+      super.deprecated});
 }
 
 /// Annotation for nested DTO object fields.
@@ -328,28 +404,6 @@ class ZObject {
   final String? mapKey;
 }
 
-/// Marks a field as nullable and optional.
-///
-/// A `@ZNullable()` field may be absent from the request body or explicitly
-/// null — both are treated identically.
-///
-/// Example:
-/// ```dart
-/// @ZString(description: 'Nickname')
-/// @ZNullable()
-/// final String? nickname;
-/// ```
-@Deprecated('Nullability is now inferred from Dart\'s ? type suffix. Remove this annotation.')
-class ZNullable {
-  const ZNullable();
-}
-
-/// @deprecated Use [ZNullable] instead.
-@Deprecated('Use @ZNullable()')
-class Nullable {
-  const Nullable();
-}
-
 /// Marks a class as a Zto DTO with optional [parseType] for key inference.
 ///
 /// [description] is shown in OpenAPI / Swagger UI. [parseType] controls how
@@ -362,7 +416,10 @@ class Nullable {
 /// class CreateUserDto with ZtoDto<CreateUserDto> { ... }
 /// ```
 class ZDto {
-  const ZDto({required this.description, this.parseType = ParseType.camelCase, this.deprecated = false});
+  const ZDto(
+      {required this.description,
+      this.parseType = ParseType.camelCase,
+      this.deprecated = false});
 
   final String description;
   final ParseType parseType;
@@ -379,7 +436,10 @@ class ZDto {
 /// class UserEntity with ZtoDto<UserEntity> { ... }
 /// ```
 class ZEntity {
-  const ZEntity({required this.description, this.parseType = ParseType.camelCase, this.deprecated = false});
+  const ZEntity(
+      {required this.description,
+      this.parseType = ParseType.camelCase,
+      this.deprecated = false});
 
   final String description;
   final ParseType parseType;
@@ -397,7 +457,10 @@ class ZEntity {
 /// class UserModel with ZtoDto<UserModel> { ... }
 /// ```
 class ZModel {
-  const ZModel({required this.description, this.parseType = ParseType.camelCase, this.deprecated = false});
+  const ZModel(
+      {required this.description,
+      this.parseType = ParseType.camelCase,
+      this.deprecated = false});
 
   final String description;
   final ParseType parseType;

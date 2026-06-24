@@ -49,12 +49,14 @@ const $userWithAddressesDtoSchema = ZtoSchema(
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZObj(mapKey: 'primaryAddress', dtoSchema: $addressDtoSchema),
+      fieldAnnotation:
+          ZObj(mapKey: 'primaryAddress', dtoSchema: $addressDtoSchema),
       validators: [],
       isNullable: false,
     ),
     FieldDescriptor(
-      fieldAnnotation: ZListOf(mapKey: 'secondaryAddresses', dtoSchema: $addressDtoSchema),
+      fieldAnnotation:
+          ZListOf(mapKey: 'secondaryAddresses', dtoSchema: $addressDtoSchema),
       validators: [],
       isNullable: false,
     ),
@@ -79,7 +81,8 @@ class AddressDto with ZtoDto<AddressDto> {
         street: m['street'] as String,
         city: m['city'] as String,
         zipCode: m['zipCode'] as int,
-      ).refine((d) => d.street.startsWith('Main St'), message: 'Street must start with "Main St"');
+      ).refine((d) => d.street.startsWith('Main St'),
+          message: 'Street must start with "Main St"');
 }
 
 // ── UserDto with single Address (ZObj) ─────────────────────────────────────
@@ -94,10 +97,12 @@ class UserWithAddressDto with ZtoDto<UserWithAddressDto> {
     required this.address,
   });
 
-  factory UserWithAddressDto.fromMap(Map<String, dynamic> m) => UserWithAddressDto(
+  factory UserWithAddressDto.fromMap(Map<String, dynamic> m) =>
+      UserWithAddressDto(
         name: m['name'] as String,
         address: AddressDto.fromMap(m['address'] as Map<String, dynamic>),
-      ).refine((dto) => dto.name.startsWith('Alice'), message: 'Name must start with "Alice"');
+      ).refine((dto) => dto.name.startsWith('Alice'),
+          message: 'Name must start with "Alice"');
 }
 
 // ── UserDto with primary address + list of secondary addresses ──────────────
@@ -114,10 +119,15 @@ class UserWithAddressesDto {
     required this.secondaryAddresses,
   });
 
-  factory UserWithAddressesDto.fromMap(Map<String, dynamic> m) => UserWithAddressesDto(
+  factory UserWithAddressesDto.fromMap(Map<String, dynamic> m) =>
+      UserWithAddressesDto(
         name: m['name'] as String,
-        primaryAddress: AddressDto.fromMap(m['primaryAddress'] as Map<String, dynamic>),
-        secondaryAddresses: (m['secondaryAddresses'] as List?)?.map((e) => AddressDto.fromMap(e as Map<String, dynamic>)).toList() ?? [],
+        primaryAddress:
+            AddressDto.fromMap(m['primaryAddress'] as Map<String, dynamic>),
+        secondaryAddresses: (m['secondaryAddresses'] as List?)
+                ?.map((e) => AddressDto.fromMap(e as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }
 
@@ -141,7 +151,8 @@ void main() {
           'zipCode': 10001,
         },
       };
-      final dto = $userWithAddressDtoSchema.parse(map, UserWithAddressDto.fromMap);
+      final dto =
+          $userWithAddressDtoSchema.parse(map, UserWithAddressDto.fromMap);
       expect(dto.name, 'Alice');
       expect(dto.address.street, 'Main St');
       expect(dto.address.city, 'NYC');
@@ -191,7 +202,9 @@ void main() {
       );
     });
 
-    test('rejects when UserWithAddressDto refine fails (name must start with "Alice")', () {
+    test(
+        'rejects when UserWithAddressDto refine fails (name must start with "Alice")',
+        () {
       final map = {
         'name': 'Bob',
         'address': {
@@ -208,7 +221,9 @@ void main() {
       }
     });
 
-    test('rejects when AddressDto refine fails (street must start with "Main St")', () {
+    test(
+        'rejects when AddressDto refine fails (street must start with "Main St")',
+        () {
       final map = {
         'name': 'Alice',
         'address': {
@@ -239,7 +254,8 @@ void main() {
           {'street': 'Main St 2', 'city': 'LA', 'zipCode': 90002},
         ],
       };
-      final dto = $userWithAddressesDtoSchema.parse(map, UserWithAddressesDto.fromMap);
+      final dto =
+          $userWithAddressesDtoSchema.parse(map, UserWithAddressesDto.fromMap);
       expect(dto.name, 'Bob');
       expect(dto.primaryAddress.street, 'Main St');
       expect(dto.secondaryAddresses, hasLength(1));
@@ -257,7 +273,8 @@ void main() {
         'secondaryAddresses': [],
       };
       expect(
-        () => $userWithAddressesDtoSchema.parse(map, UserWithAddressesDto.fromMap),
+        () => $userWithAddressesDtoSchema.parse(
+            map, UserWithAddressesDto.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });
@@ -276,7 +293,8 @@ void main() {
         ],
       };
       expect(
-        () => $userWithAddressesDtoSchema.parse(map, UserWithAddressesDto.fromMap),
+        () => $userWithAddressesDtoSchema.parse(
+            map, UserWithAddressesDto.fromMap),
         throwsA(isA<ZtoException>()),
       );
     });

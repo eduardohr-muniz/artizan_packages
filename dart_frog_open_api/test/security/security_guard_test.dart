@@ -2,8 +2,8 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:test/test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../lib/src/security/security_config.dart';
-import '../../lib/src/security/security_guard.dart';
+import 'package:dart_frog_open_api/src/security/security_config.dart';
+import 'package:dart_frog_open_api/src/security/security_guard.dart';
 
 class _MockRequest extends Mock implements Request {}
 
@@ -18,13 +18,12 @@ void main() {
     group('isAllowed', () {
       group('when enabled is false', () {
         test('returns false regardless of guard', () {
-          const config = SecurityConfig(enabled: false);
+          const config = SecurityConfig();
           expect(SecurityGuard.isAllowed(request, config), isFalse);
         });
 
         test('returns false even with permissive guard', () {
           final config = SecurityConfig(
-            enabled: false,
             guard: (_) => true,
           );
           expect(SecurityGuard.isAllowed(request, config), isFalse);
@@ -70,7 +69,7 @@ void main() {
 
     group('corsHeaders', () {
       test('returns empty map when corsOrigins is null', () {
-        const config = SecurityConfig(enabled: true, corsOrigins: null);
+        const config = SecurityConfig(enabled: true);
         when(() => request.headers).thenReturn({});
         final headers = SecurityGuard.corsHeaders(request, config);
         expect(headers, isEmpty);
@@ -78,7 +77,8 @@ void main() {
 
       test('returns empty map when corsOrigins is empty list', () {
         const config = SecurityConfig(enabled: true, corsOrigins: []);
-        when(() => request.headers).thenReturn({'Origin': 'http://localhost:3000'});
+        when(() => request.headers)
+            .thenReturn({'Origin': 'http://localhost:3000'});
         final headers = SecurityGuard.corsHeaders(request, config);
         expect(headers, isEmpty);
       });
@@ -88,9 +88,11 @@ void main() {
           enabled: true,
           corsOrigins: ['http://localhost:3000'],
         );
-        when(() => request.headers).thenReturn({'Origin': 'http://localhost:3000'});
+        when(() => request.headers)
+            .thenReturn({'Origin': 'http://localhost:3000'});
         final headers = SecurityGuard.corsHeaders(request, config);
-        expect(headers['Access-Control-Allow-Origin'], equals('http://localhost:3000'));
+        expect(headers['Access-Control-Allow-Origin'],
+            equals('http://localhost:3000'));
       });
 
       test('returns specific matching origin, not wildcard', () {
@@ -98,9 +100,11 @@ void main() {
           enabled: true,
           corsOrigins: ['http://localhost:3000', 'https://admin.example.com'],
         );
-        when(() => request.headers).thenReturn({'Origin': 'https://admin.example.com'});
+        when(() => request.headers)
+            .thenReturn({'Origin': 'https://admin.example.com'});
         final headers = SecurityGuard.corsHeaders(request, config);
-        expect(headers['Access-Control-Allow-Origin'], equals('https://admin.example.com'));
+        expect(headers['Access-Control-Allow-Origin'],
+            equals('https://admin.example.com'));
         expect(headers['Access-Control-Allow-Origin'], isNot(equals('*')));
       });
 
@@ -129,7 +133,8 @@ void main() {
           enabled: true,
           corsOrigins: ['http://localhost:3000'],
         );
-        when(() => request.headers).thenReturn({'Origin': 'http://localhost:3000'});
+        when(() => request.headers)
+            .thenReturn({'Origin': 'http://localhost:3000'});
         final headers = SecurityGuard.corsHeaders(request, config);
         expect(headers['Access-Control-Allow-Origin'], isNot(equals('*')));
       });
@@ -143,32 +148,32 @@ void main() {
       });
 
       test('includes X-Content-Type-Options: nosniff', () {
-        const config = SecurityConfig(enabled: true, securityHeaders: true);
+        const config = SecurityConfig(enabled: true);
         final headers = SecurityGuard.securityResponseHeaders(config);
         expect(headers['X-Content-Type-Options'], equals('nosniff'));
       });
 
       test('includes X-Frame-Options: DENY', () {
-        const config = SecurityConfig(enabled: true, securityHeaders: true);
+        const config = SecurityConfig(enabled: true);
         final headers = SecurityGuard.securityResponseHeaders(config);
         expect(headers['X-Frame-Options'], equals('DENY'));
       });
 
       test('includes Referrer-Policy', () {
-        const config = SecurityConfig(enabled: true, securityHeaders: true);
+        const config = SecurityConfig(enabled: true);
         final headers = SecurityGuard.securityResponseHeaders(config);
         expect(headers['Referrer-Policy'], isNotEmpty);
       });
 
       test('includes Content-Security-Policy', () {
-        const config = SecurityConfig(enabled: true, securityHeaders: true);
+        const config = SecurityConfig(enabled: true);
         final headers = SecurityGuard.securityResponseHeaders(config);
         expect(headers['Content-Security-Policy'], isNotNull);
         expect(headers['Content-Security-Policy'], isNotEmpty);
       });
 
       test('CSP allows unpkg.com for Swagger UI CDN assets', () {
-        const config = SecurityConfig(enabled: true, securityHeaders: true);
+        const config = SecurityConfig(enabled: true);
         final headers = SecurityGuard.securityResponseHeaders(config);
         expect(headers['Content-Security-Policy'], contains('unpkg.com'));
       });

@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import '../../lib/src/internal/collection_utils.dart';
+import 'package:dart_frog_open_api/src/internal/collection_utils.dart';
 
 void main() {
   group('toFilename', () {

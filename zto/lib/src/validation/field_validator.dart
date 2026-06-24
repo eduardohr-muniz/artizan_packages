@@ -43,7 +43,8 @@ abstract final class FieldValidator {
 
     if (descriptor.fieldAnnotation is ZObj && value is Map<String, dynamic>) {
       final obj = descriptor.fieldAnnotation as ZObj;
-      final schema = obj.dtoSchema ?? (obj.dtoType != null ? Zto.getSchema(obj.dtoType!) : null);
+      final schema = obj.dtoSchema ??
+          (obj.dtoType != null ? Zto.getSchema(obj.dtoType!) : null);
       if (schema != null) {
         issues.addAll(_validateNested(key, schema as ZtoSchema, value));
       }
@@ -51,7 +52,8 @@ abstract final class FieldValidator {
 
     if (descriptor.fieldAnnotation is ZListOf && value is List) {
       final listOf = descriptor.fieldAnnotation as ZListOf;
-      final schema = listOf.dtoSchema ?? (listOf.dtoType != null ? Zto.getSchema(listOf.dtoType!) : null);
+      final schema = listOf.dtoSchema ??
+          (listOf.dtoType != null ? Zto.getSchema(listOf.dtoType!) : null);
 
       if (schema != null) {
         final List list = value;
@@ -72,7 +74,8 @@ abstract final class FieldValidator {
     return issues;
   }
 
-  static List<ZtoIssue> _validateNested(String prefix, ZtoSchema schema, Map<String, dynamic> map) {
+  static List<ZtoIssue> _validateNested(
+      String prefix, ZtoSchema schema, Map<String, dynamic> map) {
     final issues = <ZtoIssue>[];
     for (final d in schema.descriptors) {
       final nestedIssues = validate(d, map[d.key]);
@@ -104,7 +107,8 @@ abstract final class FieldValidator {
       ZBool() => value is bool,
       ZDate() => value is String || value is DateTime,
       ZFile() => true,
-      ZEnum(:final values) => value is String && values.map(_enumValueName).contains(value),
+      ZEnum(:final values) =>
+        value is String && values.map(_enumValueName).contains(value),
       ZList() => value is List,
       ZListOf() => value is List,
       ZObj() => value is Map,
@@ -122,7 +126,8 @@ abstract final class FieldValidator {
       ZNum() => '"$key" must be a number (got ${value.runtimeType})',
       ZBool() => '"$key" must be a boolean (got ${value.runtimeType})',
       ZDate() => '"$key" must be a date-time (got ${value.runtimeType})',
-      ZEnum(:final values) => '"$key" must be one of [${values.map(_enumValueName).join(', ')}] (got ${value.runtimeType})',
+      ZEnum(:final values) =>
+        '"$key" must be one of [${values.map(_enumValueName).join(', ')}] (got ${value.runtimeType})',
       ZList() => '"$key" must be an array (got ${value.runtimeType})',
       ZListOf() => '"$key" must be an array (got ${value.runtimeType})',
       ZObj() => '"$key" must be an object (got ${value.runtimeType})',
@@ -140,74 +145,103 @@ abstract final class FieldValidator {
   /// Normaliza um valor permitido de `@ZEnum` para a forma serializada:
   /// enums do Dart serializam via `.name` (ex.: `DeliveryMethod.polygon` → `polygon`);
   /// valores já em `String` (ex.: `@ZEnum(values: ['admin', 'editor'])`) passam direto.
-  static String _enumValueName(Object? value) => value is Enum ? value.name : '$value';
+  static String _enumValueName(Object? value) =>
+      value is Enum ? value.name : '$value';
 
   static ZtoIssue? _runValidator(ZtoValidator v, dynamic value, String key) {
     return switch (v) {
-      ZMinLength(:final n, :final message) => value is String && value.length < n
-          ? ZtoIssue(
-              message: message ?? '"$key" must be at least $n characters',
-              field: key,
-            )
-          : null,
-      ZMaxLength(:final n, :final message) => value is String && value.length > n
-          ? ZtoIssue(
-              message: message ?? '"$key" must be at most $n characters',
-              field: key,
-            )
-          : null,
+      ZMinLength(:final n, :final message) =>
+        value is String && value.length < n
+            ? ZtoIssue(
+                message: message ?? '"$key" must be at least $n characters',
+                field: key,
+              )
+            : null,
+      ZMaxLength(:final n, :final message) =>
+        value is String && value.length > n
+            ? ZtoIssue(
+                message: message ?? '"$key" must be at most $n characters',
+                field: key,
+              )
+            : null,
       ZLength(:final n, :final message) => value is String && value.length != n
           ? ZtoIssue(
               message: message ?? '"$key" must be exactly $n characters',
               field: key,
             )
           : null,
-      ZEmail(:final message) =>
-        value is String && !_emailRegex.hasMatch(value) ? ZtoIssue(message: message ?? '"$key" must be a valid email', field: key) : null,
+      ZEmail(:final message) => value is String && !_emailRegex.hasMatch(value)
+          ? ZtoIssue(
+              message: message ?? '"$key" must be a valid email', field: key)
+          : null,
       ZUuid(:final message) =>
-        value is String && !_uuidRegex.hasMatch(value.toLowerCase()) ? ZtoIssue(message: message ?? '"$key" must be a valid UUID', field: key) : null,
+        value is String && !_uuidRegex.hasMatch(value.toLowerCase())
+            ? ZtoIssue(
+                message: message ?? '"$key" must be a valid UUID', field: key)
+            : null,
       ZUrl(:final message) =>
-        value is String && Uri.tryParse(value)?.hasScheme != true ? ZtoIssue(message: message ?? '"$key" must be a valid URL', field: key) : null,
-      ZPattern(:final regex, :final message) => value is String && !RegExp(regex).hasMatch(value)
+        value is String && Uri.tryParse(value)?.hasScheme != true
+            ? ZtoIssue(
+                message: message ?? '"$key" must be a valid URL', field: key)
+            : null,
+      ZPattern(:final regex, :final message) =>
+        value is String && !RegExp(regex).hasMatch(value)
+            ? ZtoIssue(
+                message: message ?? '"$key" must match pattern $regex',
+                field: key,
+              )
+            : null,
+      ZStartsWith(:final prefix, :final message) =>
+        value is String && !value.startsWith(prefix)
+            ? ZtoIssue(
+                message: message ?? '"$key" must start with "$prefix"',
+                field: key,
+              )
+            : null,
+      ZEndsWith(:final suffix, :final message) =>
+        value is String && !value.endsWith(suffix)
+            ? ZtoIssue(
+                message: message ?? '"$key" must end with "$suffix"',
+                field: key,
+              )
+            : null,
+      ZIncludes(:final substring, :final message) =>
+        value is String && !value.contains(substring)
+            ? ZtoIssue(
+                message: message ?? '"$key" must contain "$substring"',
+                field: key,
+              )
+            : null,
+      ZBase64(:final message) => value is String && !_isValidBase64(value)
           ? ZtoIssue(
-              message: message ?? '"$key" must match pattern $regex',
-              field: key,
-            )
+              message: message ?? '"$key" must be valid Base64', field: key)
           : null,
-      ZStartsWith(:final prefix, :final message) => value is String && !value.startsWith(prefix)
+      ZHex(:final message) => value is String && !_hexRegex.hasMatch(value)
           ? ZtoIssue(
-              message: message ?? '"$key" must start with "$prefix"',
-              field: key,
-            )
+              message: message ?? '"$key" must be valid hexadecimal',
+              field: key)
           : null,
-      ZEndsWith(:final suffix, :final message) => value is String && !value.endsWith(suffix)
+      ZIpv4(:final message) => value is String && !_ipv4Regex.hasMatch(value)
           ? ZtoIssue(
-              message: message ?? '"$key" must end with "$suffix"',
-              field: key,
-            )
+              message: message ?? '"$key" must be a valid IPv4 address',
+              field: key)
           : null,
-      ZIncludes(:final substring, :final message) => value is String && !value.contains(substring)
+      ZIpv6(:final message) => value is String && !_ipv6Regex.hasMatch(value)
           ? ZtoIssue(
-              message: message ?? '"$key" must contain "$substring"',
-              field: key,
-            )
+              message: message ?? '"$key" must be a valid IPv6 address',
+              field: key)
           : null,
-      ZBase64(:final message) =>
-        value is String && !_isValidBase64(value) ? ZtoIssue(message: message ?? '"$key" must be valid Base64', field: key) : null,
-      ZHex(:final message) =>
-        value is String && !_hexRegex.hasMatch(value) ? ZtoIssue(message: message ?? '"$key" must be valid hexadecimal', field: key) : null,
-      ZIpv4(:final message) =>
-        value is String && !_ipv4Regex.hasMatch(value) ? ZtoIssue(message: message ?? '"$key" must be a valid IPv4 address', field: key) : null,
-      ZIpv6(:final message) =>
-        value is String && !_ipv6Regex.hasMatch(value) ? ZtoIssue(message: message ?? '"$key" must be a valid IPv6 address', field: key) : null,
       ZHttpUrl(:final message) => () {
           if (value is! String) return null;
           final uri = Uri.tryParse(value);
-          final ok = uri != null && (uri.scheme == 'http' || uri.scheme == 'https') && uri.hasScheme;
+          final ok = uri != null &&
+              (uri.scheme == 'http' || uri.scheme == 'https') &&
+              uri.hasScheme;
           return ok
               ? null
               : ZtoIssue(
-                  message: message ?? '"$key" must be a valid HTTP or HTTPS URL',
+                  message:
+                      message ?? '"$key" must be a valid HTTP or HTTPS URL',
                   field: key,
                 );
         }(),
@@ -215,54 +249,92 @@ abstract final class FieldValidator {
           if (value is! String) return null;
           final parts = value.split('.');
           final invalid = parts.length != 3 || parts.any((p) => p.isEmpty);
-          return invalid ? ZtoIssue(message: message ?? '"$key" must be a valid JWT', field: key) : null;
+          return invalid
+              ? ZtoIssue(
+                  message: message ?? '"$key" must be a valid JWT', field: key)
+              : null;
         }(),
       ZIsoDate(:final message) => () {
           if (value is! String) return null;
           final p = DateTime.tryParse(value);
-          final ok = _isoDateRegex.hasMatch(value) && p != null && p.toIso8601String().startsWith(value);
+          final ok = _isoDateRegex.hasMatch(value) &&
+              p != null &&
+              p.toIso8601String().startsWith(value);
           return ok
               ? null
               : ZtoIssue(
-                  message: message ?? '"$key" must be a valid ISO date (YYYY-MM-DD)',
+                  message:
+                      message ?? '"$key" must be a valid ISO date (YYYY-MM-DD)',
                   field: key,
                 );
         }(),
-      ZIsoDateTime(:final message) => value is String && (!value.contains('T') || DateTime.tryParse(value) == null)
+      ZIsoDateTime(:final message) => value is String &&
+              (!value.contains('T') || DateTime.tryParse(value) == null)
           ? ZtoIssue(
               message: message ?? '"$key" must be a valid ISO 8601 datetime',
               field: key,
             )
           : null,
-      ZMin(:final n, :final message) => value is num && value < n ? ZtoIssue(message: message ?? '"$key" must be >= $n', field: key) : null,
-      ZMax(:final n, :final message) => value is num && value > n ? ZtoIssue(message: message ?? '"$key" must be <= $n', field: key) : null,
-      ZPositive(:final message) => value is num && value <= 0 ? ZtoIssue(message: message ?? '"$key" must be positive', field: key) : null,
-      ZNegative(:final message) => value is num && value >= 0 ? ZtoIssue(message: message ?? '"$key" must be negative', field: key) : null,
-      ZMultipleOf(:final n, :final message) =>
-        value is num && value % n != 0 ? ZtoIssue(message: message ?? '"$key" must be a multiple of $n', field: key) : null,
+      ZMin(:final n, :final message) => value is num && value < n
+          ? ZtoIssue(message: message ?? '"$key" must be >= $n', field: key)
+          : null,
+      ZMax(:final n, :final message) => value is num && value > n
+          ? ZtoIssue(message: message ?? '"$key" must be <= $n', field: key)
+          : null,
+      ZPositive(:final message) => value is num && value <= 0
+          ? ZtoIssue(message: message ?? '"$key" must be positive', field: key)
+          : null,
+      ZNegative(:final message) => value is num && value >= 0
+          ? ZtoIssue(message: message ?? '"$key" must be negative', field: key)
+          : null,
+      ZMultipleOf(:final n, :final message) => value is num && value % n != 0
+          ? ZtoIssue(
+              message: message ?? '"$key" must be a multiple of $n', field: key)
+          : null,
       ZInteger(:final message) =>
-        value is num && value != value.truncateToDouble() ? ZtoIssue(message: message ?? '"$key" must be an integer', field: key) : null,
-      ZNonNegative(:final message) => value is num && value < 0 ? ZtoIssue(message: message ?? '"$key" must be >= 0', field: key) : null,
-      ZNonPositive(:final message) => value is num && value > 0 ? ZtoIssue(message: message ?? '"$key" must be <= 0', field: key) : null,
-      ZFinite(:final message) => value is num && (value == double.infinity || value == double.negativeInfinity || value != value)
+        value is num && value != value.truncateToDouble()
+            ? ZtoIssue(
+                message: message ?? '"$key" must be an integer', field: key)
+            : null,
+      ZNonNegative(:final message) => value is num && value < 0
+          ? ZtoIssue(message: message ?? '"$key" must be >= 0', field: key)
+          : null,
+      ZNonPositive(:final message) => value is num && value > 0
+          ? ZtoIssue(message: message ?? '"$key" must be <= 0', field: key)
+          : null,
+      ZFinite(:final message) => value is num &&
+              (value == double.infinity ||
+                  value == double.negativeInfinity ||
+                  value != value)
           ? ZtoIssue(message: message ?? '"$key" must be finite', field: key)
           : null,
-      ZSafeInt(:final message) => value is num && (value < -9007199254740991 || value > 9007199254740991 || value != value.truncateToDouble())
+      ZSafeInt(:final message) => value is num &&
+              (value < -9007199254740991 ||
+                  value > 9007199254740991 ||
+                  value != value.truncateToDouble())
           ? ZtoIssue(
               message: message ?? '"$key" must be a safe integer',
               field: key,
             )
           : null,
-      ZUppercase(:final message) =>
-        value is String && value != value.toUpperCase() ? ZtoIssue(message: message ?? '"$key" must be uppercase', field: key) : null,
-      ZLowercase(:final message) =>
-        value is String && value != value.toLowerCase() ? ZtoIssue(message: message ?? '"$key" must be lowercase', field: key) : null,
-      ZSlug(:final message) => value is String && !RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(value)
-          ? ZtoIssue(message: message ?? '"$key" must be a valid slug', field: key)
+      ZUppercase(:final message) => value is String &&
+              value != value.toUpperCase()
+          ? ZtoIssue(message: message ?? '"$key" must be uppercase', field: key)
           : null,
-      ZAlphanumeric(:final message) => value is String && !RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)
-          ? ZtoIssue(message: message ?? '"$key" must be alphanumeric', field: key)
+      ZLowercase(:final message) => value is String &&
+              value != value.toLowerCase()
+          ? ZtoIssue(message: message ?? '"$key" must be lowercase', field: key)
           : null,
+      ZSlug(:final message) => value is String &&
+              !RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(value)
+          ? ZtoIssue(
+              message: message ?? '"$key" must be a valid slug', field: key)
+          : null,
+      ZAlphanumeric(:final message) =>
+        value is String && !RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)
+            ? ZtoIssue(
+                message: message ?? '"$key" must be alphanumeric', field: key)
+            : null,
       _ => null,
     };
   }

@@ -46,9 +46,12 @@ class DtoGenerator extends GeneratorForAnnotation<Dto> {
     final schemaName = '\$${className}Schema';
 
     final fields = _annotatedFields(classElement);
-    final descriptors = fields.map((f) => _buildDescriptorLegacy(f, classElement)).join(',\n    ');
+    final descriptors = fields
+        .map((f) => _buildDescriptorLegacy(f, classElement))
+        .join(',\n    ');
 
-    final hasFromMap = classElement.constructors.any((c) => c.name == 'fromMap');
+    final hasFromMap =
+        classElement.constructors.any((c) => c.name == 'fromMap');
 
     final registration = hasFromMap
         ? '''
@@ -67,7 +70,9 @@ const $schemaName = ZtoSchema(
   }
 
   List<FieldElement> _annotatedFields(ClassElement classElement) {
-    return classElement.fields.where((f) => f.metadata.any(AnnotationEncoder.isFieldType)).toList();
+    return classElement.fields
+        .where((f) => f.metadata.any(AnnotationEncoder.isFieldType))
+        .toList();
   }
 
   /// Legacy descriptor builder — keeps backward compat with @Dto classes
@@ -86,7 +91,8 @@ const $schemaName = ZtoSchema(
     )''';
   }
 
-  void _validateFieldValidatorsLegacy(FieldElement field, ClassElement classElement) {
+  void _validateFieldValidatorsLegacy(
+      FieldElement field, ClassElement classElement) {
     // Delegate to schema_generator validation helper via inline copy
     // to avoid changing the shared function's signature.
     final fieldTypeName = _getZtoFieldTypeName(field);
@@ -127,18 +133,15 @@ const $schemaName = ZtoSchema(
   }
 
   String _encodeValidators(FieldElement field) {
-    return field.metadata.where(AnnotationEncoder.isValidator).map(AnnotationEncoder.encode).whereType<String>().join(', ');
+    return field.metadata
+        .where(AnnotationEncoder.isValidator)
+        .map(AnnotationEncoder.encode)
+        .whereType<String>()
+        .join(', ');
   }
 
-  bool _hasNullable(FieldElement field) {
-    // Check Dart's type system first (? suffix)
-    if (field.type.nullabilitySuffix == NullabilitySuffix.question) return true;
-    // Fallback to annotation for backward compatibility
-    return field.metadata.any((m) {
-      final source = m.toSource();
-      return source == '@ZNullable()' || source == '@ZNullable' || source == '@Nullable()' || source == '@Nullable';
-    });
-  }
+  bool _hasNullable(FieldElement field) =>
+      field.type.nullabilitySuffix == NullabilitySuffix.question;
 
   String? _getZtoFieldTypeName(FieldElement field) {
     for (final meta in field.metadata) {

@@ -1,12 +1,13 @@
 import 'package:test/test.dart';
 
-import '../../lib/src/security/input_sanitizer.dart';
+import 'package:dart_frog_open_api/src/security/input_sanitizer.dart';
 
 void main() {
   group('InputSanitizer', () {
     group('escapeForJs', () {
       test('returns plain string unchanged', () {
-        expect(InputSanitizer.escapeForJs('/swagger/json'), equals('/swagger/json'));
+        expect(InputSanitizer.escapeForJs('/swagger/json'),
+            equals('/swagger/json'));
       });
 
       test('escapes double quotes', () {
@@ -22,11 +23,13 @@ void main() {
       });
 
       test('escapes newline characters', () {
-        expect(InputSanitizer.escapeForJs('line1\nline2'), equals(r'line1\nline2'));
+        expect(InputSanitizer.escapeForJs('line1\nline2'),
+            equals(r'line1\nline2'));
       });
 
       test('escapes carriage return characters', () {
-        expect(InputSanitizer.escapeForJs('line1\rline2'), equals(r'line1\rline2'));
+        expect(InputSanitizer.escapeForJs('line1\rline2'),
+            equals(r'line1\rline2'));
       });
 
       test('escapes < to prevent </script> injection', () {
@@ -67,7 +70,8 @@ void main() {
       });
 
       test('escapes double quotes', () {
-        expect(InputSanitizer.escapeForHtml('"quoted"'), equals('&quot;quoted&quot;'));
+        expect(InputSanitizer.escapeForHtml('"quoted"'),
+            equals('&quot;quoted&quot;'));
       });
 
       test('escapes single quotes', () {
@@ -88,7 +92,8 @@ void main() {
 
     group('sanitizeSpecUrl', () {
       test('returns valid relative URL unchanged', () {
-        expect(InputSanitizer.sanitizeSpecUrl('/swagger/json'), equals('/swagger/json'));
+        expect(InputSanitizer.sanitizeSpecUrl('/swagger/json'),
+            equals('/swagger/json'));
       });
 
       test('returns valid absolute URL unchanged', () {

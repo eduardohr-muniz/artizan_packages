@@ -33,11 +33,20 @@ class ZtoStringRule extends ZtoRule {
 
   static final _emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
 
-  ZtoStringRule nullable() => ZtoStringRule._(nullable: true, min: _min, max: _max, email: _email, pattern: _pattern);
-  ZtoStringRule min(int n) => ZtoStringRule._(nullable: _nullable, min: n, max: _max, email: _email, pattern: _pattern);
-  ZtoStringRule max(int n) => ZtoStringRule._(nullable: _nullable, min: _min, max: n, email: _email, pattern: _pattern);
-  ZtoStringRule email() => ZtoStringRule._(nullable: _nullable, min: _min, max: _max, email: true, pattern: _pattern);
-  ZtoStringRule matches(RegExp regex) => ZtoStringRule._(nullable: _nullable, min: _min, max: _max, email: _email, pattern: regex);
+  ZtoStringRule nullable() => ZtoStringRule._(
+      nullable: true, min: _min, max: _max, email: _email, pattern: _pattern);
+  ZtoStringRule min(int n) => ZtoStringRule._(
+      nullable: _nullable, min: n, max: _max, email: _email, pattern: _pattern);
+  ZtoStringRule max(int n) => ZtoStringRule._(
+      nullable: _nullable, min: _min, max: n, email: _email, pattern: _pattern);
+  ZtoStringRule email() => ZtoStringRule._(
+      nullable: _nullable,
+      min: _min,
+      max: _max,
+      email: true,
+      pattern: _pattern);
+  ZtoStringRule matches(RegExp regex) => ZtoStringRule._(
+      nullable: _nullable, min: _min, max: _max, email: _email, pattern: regex);
 
   @override
   List<ZtoIssue> validate(String key, dynamic value) {
@@ -46,20 +55,28 @@ class ZtoStringRule extends ZtoRule {
       return [ZtoIssue(message: '"$key" is required', field: key)];
     }
     if (value is! String) {
-      return [ZtoIssue(message: '"$key" must be a string (got ${value.runtimeType})', field: key)];
+      return [
+        ZtoIssue(
+            message: '"$key" must be a string (got ${value.runtimeType})',
+            field: key)
+      ];
     }
     final issues = <ZtoIssue>[];
     if (_min != null && value.length < _min) {
-      issues.add(ZtoIssue(message: '"$key" must be at least $_min characters', field: key));
+      issues.add(ZtoIssue(
+          message: '"$key" must be at least $_min characters', field: key));
     }
     if (_max != null && value.length > _max) {
-      issues.add(ZtoIssue(message: '"$key" must be at most $_max characters', field: key));
+      issues.add(ZtoIssue(
+          message: '"$key" must be at most $_max characters', field: key));
     }
     if (_email && !_emailRegex.hasMatch(value)) {
       issues.add(ZtoIssue(message: '"$key" must be a valid email', field: key));
     }
     if (_pattern != null && !_pattern.hasMatch(value)) {
-      issues.add(ZtoIssue(message: '"$key" must match pattern ${_pattern.pattern}', field: key));
+      issues.add(ZtoIssue(
+          message: '"$key" must match pattern ${_pattern.pattern}',
+          field: key));
     }
     return issues;
   }
@@ -90,11 +107,19 @@ class ZtoIntRule extends ZtoRule {
       return [ZtoIssue(message: '"$key" is required', field: key)];
     }
     if (value is! int) {
-      return [ZtoIssue(message: '"$key" must be an integer (got ${value.runtimeType})', field: key)];
+      return [
+        ZtoIssue(
+            message: '"$key" must be an integer (got ${value.runtimeType})',
+            field: key)
+      ];
     }
     final issues = <ZtoIssue>[];
-    if (_min != null && value < _min) issues.add(ZtoIssue(message: '"$key" must be >= $_min', field: key));
-    if (_max != null && value > _max) issues.add(ZtoIssue(message: '"$key" must be <= $_max', field: key));
+    if (_min != null && value < _min) {
+      issues.add(ZtoIssue(message: '"$key" must be >= $_min', field: key));
+    }
+    if (_max != null && value > _max) {
+      issues.add(ZtoIssue(message: '"$key" must be <= $_max', field: key));
+    }
     return issues;
   }
 }
@@ -113,9 +138,12 @@ class ZtoDoubleRule extends ZtoRule {
   final num? _min;
   final num? _max;
 
-  ZtoDoubleRule nullable() => ZtoDoubleRule._(nullable: true, min: _min, max: _max);
-  ZtoDoubleRule min(num n) => ZtoDoubleRule._(nullable: _nullable, min: n, max: _max);
-  ZtoDoubleRule max(num n) => ZtoDoubleRule._(nullable: _nullable, min: _min, max: n);
+  ZtoDoubleRule nullable() =>
+      ZtoDoubleRule._(nullable: true, min: _min, max: _max);
+  ZtoDoubleRule min(num n) =>
+      ZtoDoubleRule._(nullable: _nullable, min: n, max: _max);
+  ZtoDoubleRule max(num n) =>
+      ZtoDoubleRule._(nullable: _nullable, min: _min, max: n);
 
   @override
   List<ZtoIssue> validate(String key, dynamic value) {
@@ -124,11 +152,19 @@ class ZtoDoubleRule extends ZtoRule {
       return [ZtoIssue(message: '"$key" is required', field: key)];
     }
     if (value is! num) {
-      return [ZtoIssue(message: '"$key" must be a number (got ${value.runtimeType})', field: key)];
+      return [
+        ZtoIssue(
+            message: '"$key" must be a number (got ${value.runtimeType})',
+            field: key)
+      ];
     }
     final issues = <ZtoIssue>[];
-    if (_min != null && value < _min) issues.add(ZtoIssue(message: '"$key" must be >= $_min', field: key));
-    if (_max != null && value > _max) issues.add(ZtoIssue(message: '"$key" must be <= $_max', field: key));
+    if (_min != null && value < _min) {
+      issues.add(ZtoIssue(message: '"$key" must be >= $_min', field: key));
+    }
+    if (_max != null && value > _max) {
+      issues.add(ZtoIssue(message: '"$key" must be <= $_max', field: key));
+    }
     return issues;
   }
 }
@@ -150,7 +186,11 @@ class ZtoBoolRule extends ZtoRule {
       return [ZtoIssue(message: '"$key" is required', field: key)];
     }
     if (value is! bool) {
-      return [ZtoIssue(message: '"$key" must be a boolean (got ${value.runtimeType})', field: key)];
+      return [
+        ZtoIssue(
+            message: '"$key" must be a boolean (got ${value.runtimeType})',
+            field: key)
+      ];
     }
     return const [];
   }
@@ -173,11 +213,16 @@ class ZtoObjectRule extends ZtoRule {
       return [ZtoIssue(message: '"$key" is required', field: key)];
     }
     if (value is! Map<String, dynamic>) {
-      return [ZtoIssue(message: '"$key" must be an object (got ${value.runtimeType})', field: key)];
+      return [
+        ZtoIssue(
+            message: '"$key" must be an object (got ${value.runtimeType})',
+            field: key)
+      ];
     }
     final issues = <ZtoIssue>[];
     for (final entry in _shape.entries) {
-      issues.addAll(entry.value.validate('$key.${entry.key}', value[entry.key]));
+      issues
+          .addAll(entry.value.validate('$key.${entry.key}', value[entry.key]));
     }
     return issues;
   }

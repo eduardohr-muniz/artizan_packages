@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import '../../lib/src/security/spec_cache.dart';
+import 'package:dart_frog_open_api/src/security/spec_cache.dart';
 
 void main() {
   group('SpecCache', () {
@@ -16,20 +16,24 @@ void main() {
       });
 
       test('returns null after invalidation', () {
-        cache.set({'openapi': '3.0.0'});
-        cache.invalidate();
+        cache
+          ..set({'openapi': '3.0.0'})
+          ..invalidate();
         expect(cache.get(), isNull);
       });
 
       test('returns the stored spec before TTL expires', () {
-        final spec = {'openapi': '3.0.0', 'info': {'title': 'Test'}};
+        final spec = {
+          'openapi': '3.0.0',
+          'info': {'title': 'Test'}
+        };
         cache.set(spec);
         expect(cache.get(), equals(spec));
       });
 
       test('returns null after TTL expires', () async {
-        cache = SpecCache(ttl: const Duration(milliseconds: 50));
-        cache.set({'openapi': '3.0.0'});
+        cache = SpecCache(ttl: const Duration(milliseconds: 50))
+          ..set({'openapi': '3.0.0'});
         expect(cache.get(), isNotNull);
 
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -45,14 +49,15 @@ void main() {
       });
 
       test('overwrites previous spec', () {
-        cache.set({'openapi': '2.0.0'});
-        cache.set({'openapi': '3.0.0'});
+        cache
+          ..set({'openapi': '2.0.0'})
+          ..set({'openapi': '3.0.0'});
         expect(cache.get()!['openapi'], equals('3.0.0'));
       });
 
       test('resets TTL timer on each set', () async {
-        cache = SpecCache(ttl: const Duration(milliseconds: 100));
-        cache.set({'openapi': '3.0.0'});
+        cache = SpecCache(ttl: const Duration(milliseconds: 100))
+          ..set({'openapi': '3.0.0'});
 
         // Re-set before expiry
         await Future<void>.delayed(const Duration(milliseconds: 60));
@@ -80,8 +85,8 @@ void main() {
 
     group('with zero TTL', () {
       test('get always returns null when TTL is zero', () {
-        final zeroCache = SpecCache(ttl: Duration.zero);
-        zeroCache.set({'openapi': '3.0.0'});
+        final zeroCache = SpecCache(ttl: Duration.zero)
+          ..set({'openapi': '3.0.0'});
         expect(zeroCache.get(), isNull);
       });
     });

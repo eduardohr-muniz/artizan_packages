@@ -72,7 +72,8 @@ class DartFrogOpenApi {
 
       final cached = _cacheHolder.cache.get();
       if (cached != null) {
-        return json_handler.buildJsonResponse(cached, context.request, security: config.security);
+        return json_handler.buildJsonResponse(cached, context.request,
+            security: config.security);
       }
 
       return json_handler.swaggerJsonHandler(
@@ -116,8 +117,9 @@ class DartFrogOpenApi {
   /// Returns **404** when [SecurityConfig.enabled] is `false`.
   /// Returns **403** when the guard function denies the request.
   Handler scalarUiHandler({ScalarOptions options = const ScalarOptions()}) {
-    final hasBearerAuth = config.resolvedSecuritySchemes.containsKey('BearerAuth') ||
-        (config.globalSecurity?.contains('BearerAuth') ?? false);
+    final hasBearerAuth =
+        config.resolvedSecuritySchemes.containsKey('BearerAuth') ||
+            (config.globalSecurity?.contains('BearerAuth') ?? false);
 
     // Only set preferredSecurityScheme so Scalar shows the correct auth panel.
     // The token itself is injected by the JS interceptor after login.

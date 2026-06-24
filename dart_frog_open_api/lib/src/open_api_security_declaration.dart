@@ -16,7 +16,8 @@ class DeclaredSecurityScheme {
   final SecurityScheme scheme;
 
   /// Builds the map passed to OpenAPI `components.securitySchemes`.
-  static Map<String, SecurityScheme> toMap(List<DeclaredSecurityScheme> declarations) {
+  static Map<String, SecurityScheme> toMap(
+      List<DeclaredSecurityScheme> declarations) {
     final out = <String, SecurityScheme>{};
     for (final d in declarations) {
       if (out.containsKey(d.componentKey)) {
@@ -56,8 +57,7 @@ abstract final class OpenApiSecurity {
 
   /// API key sent in a request header.
   static DeclaredSecurityScheme apiKeyHeader({
-    String name = 'ApiKey',
-    required String header,
+    required String header, String name = 'ApiKey',
   }) =>
       DeclaredSecurityScheme(
         componentKey: name,
@@ -66,8 +66,7 @@ abstract final class OpenApiSecurity {
 
   /// API key sent as a query parameter.
   static DeclaredSecurityScheme apiKeyQuery({
-    String name = 'ApiKey',
-    required String param,
+    required String param, String name = 'ApiKey',
   }) =>
       DeclaredSecurityScheme(
         componentKey: name,
@@ -76,8 +75,7 @@ abstract final class OpenApiSecurity {
 
   /// API key sent in a cookie.
   static DeclaredSecurityScheme apiKeyCookie({
-    String name = 'ApiKey',
-    required String cookie,
+    required String cookie, String name = 'ApiKey',
   }) =>
       DeclaredSecurityScheme(
         componentKey: name,
@@ -146,6 +144,7 @@ abstract final class OpenApiSecurity {
       );
 
   /// Component keys for use in [ApiOperationBuilder.security] / `globalSecurity`.
-  static List<String> componentKeys(List<DeclaredSecurityScheme> declarations) =>
+  static List<String> componentKeys(
+          List<DeclaredSecurityScheme> declarations) =>
       declarations.map((d) => d.componentKey).toList(growable: false);
 }

@@ -61,21 +61,24 @@ abstract final class AnnotationEncoder {
   };
 
   /// Returns true if [annotation] is a recognised Zto field type annotation.
-  static bool isFieldType(ElementAnnotation annotation) => _matchesAny(annotation, _fieldTypes);
+  static bool isFieldType(ElementAnnotation annotation) =>
+      _matchesAny(annotation, _fieldTypes);
 
   /// Returns true if [annotation] is a recognised Zto validator annotation.
-  static bool isValidator(ElementAnnotation annotation) => _matchesAny(annotation, _validators);
+  static bool isValidator(ElementAnnotation annotation) =>
+      _matchesAny(annotation, _validators);
 
   /// Encodes [annotation] into its Dart source representation (without the `@`).
   ///
   /// Returns `null` when the annotation is not a recognised Zto annotation
-  /// (e.g. `@ZNullable`, `@Dto`, `@override`).
+  /// (e.g. `@ZDto`, `@override`).
   static String? encode(ElementAnnotation annotation) {
     final source = annotation.toSource();
     if (!source.startsWith('@')) return null;
     final code = source.substring(1); // strip the leading '@'
 
-    if (_startsWithAny(code, _fieldTypes) || _startsWithAny(code, _validators)) {
+    if (_startsWithAny(code, _fieldTypes) ||
+        _startsWithAny(code, _validators)) {
       return code;
     }
     return null;

@@ -36,10 +36,11 @@ class PlainDto {
 void main() {
   group('ZtoRefineExtension.refine (sem mixin)', () {
     test('retorna a própria instância quando o predicado é verdadeiro', () {
-      final dto = $plainDtoSchema.parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
-            (d) => d.age >= 18,
-            message: 'Must be adult',
-          );
+      final dto = $plainDtoSchema
+          .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
+        (d) => d.age >= 18,
+        message: 'Must be adult',
+      );
       expect(dto, isA<PlainDto>());
       expect(dto.name, 'Alice');
       expect(dto.age, 25);
@@ -48,18 +49,20 @@ void main() {
     test('lança ZtoException quando o predicado é falso', () {
       expect(
         () => $plainDtoSchema
-            .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap)
-            .refine((d) => d.age > 100, message: 'Unreachable age'),
+            .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
+                (d) => d.age > 100,
+                message: 'Unreachable age'),
         throwsA(isA<ZtoException>()),
       );
     });
 
     test('a exception carrega a mensagem customizada', () {
       try {
-        $plainDtoSchema.parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
-              (_) => false,
-              message: 'Custom error',
-            );
+        $plainDtoSchema
+            .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
+          (_) => false,
+          message: 'Custom error',
+        );
         fail('deveria lançar');
       } on ZtoException catch (e) {
         expect(e.issues.first.message, 'Custom error');
@@ -68,11 +71,12 @@ void main() {
 
     test('o issue carrega o field quando informado', () {
       try {
-        $plainDtoSchema.parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
-              (_) => false,
-              field: 'age',
-              message: 'Fail',
-            );
+        $plainDtoSchema
+            .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
+          (_) => false,
+          field: 'age',
+          message: 'Fail',
+        );
         fail('deveria lançar');
       } on ZtoException catch (e) {
         expect(e.issues.first.field, 'age');
@@ -81,10 +85,11 @@ void main() {
 
     test('o field é null no issue quando não informado', () {
       try {
-        $plainDtoSchema.parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
-              (_) => false,
-              message: 'Fail',
-            );
+        $plainDtoSchema
+            .parse({'name': 'Alice', 'age': 25}, PlainDto.fromMap).refine(
+          (_) => false,
+          message: 'Fail',
+        );
         fail('deveria lançar');
       } on ZtoException catch (e) {
         expect(e.issues.first.field, isNull);

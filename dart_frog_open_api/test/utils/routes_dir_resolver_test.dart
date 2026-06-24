@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -13,7 +13,8 @@ void main() {
         expect(resolved.path, equals('${base.path}/routes'));
       });
 
-      test('resolves custom folder name relative to a given base directory', () {
+      test('resolves custom folder name relative to a given base directory',
+          () {
         final base = Directory('/some/project');
         final resolved = RoutesDirResolver.resolveFrom(base, 'my_routes');
 
@@ -22,7 +23,8 @@ void main() {
 
       test('returns absolute path unchanged when given absolute path', () {
         final base = Directory('/irrelevant');
-        final resolved = RoutesDirResolver.resolveFrom(base, '/absolute/routes');
+        final resolved =
+            RoutesDirResolver.resolveFrom(base, '/absolute/routes');
 
         expect(resolved.path, equals('/absolute/routes'));
       });

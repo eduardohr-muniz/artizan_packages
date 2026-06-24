@@ -60,8 +60,10 @@ abstract final class DtoToOpenApi {
     if (d.isNullable) {
       final firstItem = <String, dynamic>{
         ...withValidators,
-        if (d.fieldAnnotation.description != null) 'description': d.fieldAnnotation.description,
-        if (d.fieldAnnotation.example != null) 'example': d.fieldAnnotation.example,
+        if (d.fieldAnnotation.description != null)
+          'description': d.fieldAnnotation.description,
+        if (d.fieldAnnotation.example != null)
+          'example': d.fieldAnnotation.example,
         if (d.fieldAnnotation.deprecated) 'deprecated': true,
       };
       return {
@@ -74,8 +76,10 @@ abstract final class DtoToOpenApi {
 
     return <String, dynamic>{
       ...withValidators,
-      if (d.fieldAnnotation.description != null) 'description': d.fieldAnnotation.description,
-      if (d.fieldAnnotation.example != null) 'example': d.fieldAnnotation.example,
+      if (d.fieldAnnotation.description != null)
+        'description': d.fieldAnnotation.description,
+      if (d.fieldAnnotation.example != null)
+        'example': d.fieldAnnotation.example,
       if (d.fieldAnnotation.deprecated) 'deprecated': true,
     };
   }
@@ -136,7 +140,10 @@ abstract final class DtoToOpenApi {
       ZBool() => {'type': 'boolean'},
       ZDate() => {'type': 'string', 'format': 'date-time'},
       ZFile() => {'type': 'string', 'format': 'binary'},
-      ZEnum(:final values) => {'type': 'string', 'enum': values.map((e) => e.toString().split('.').last).toList()},
+      ZEnum(:final values) => {
+          'type': 'string',
+          'enum': values.map((e) => e.toString().split('.').last).toList()
+        },
       ZList(:final itemType) => {
           'type': 'array',
           'items': _itemSchema(itemType),

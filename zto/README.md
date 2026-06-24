@@ -6,6 +6,8 @@
 
 Simple and powerful DTO validation for Dart backend applications. Write your DTOs once, get validation and OpenAPI documentation for free.
 
+> 📖 **[Read skill](./SKILL.md)** — agent skill with the conventions, annotations, and production patterns for working with `zto`.
+
 ## Features
 
 - **Simple DTOs** — Write DTOs with annotations for validation
@@ -15,24 +17,33 @@ Simple and powerful DTO validation for Dart backend applications. Write your DTO
 - **Business Rules** — Chain `.refine()` for complex validations
 - **Type Safe** — Full type safety with Dart generics
 
-## Installation
+## Ecosystem
 
-Add to `pubspec.yaml`:
+`zto` is the core of a three-package toolchain. You write annotated DTOs once and
+the companion packages do the rest:
 
-```yaml
-dependencies:
-  zto: ^0.1.0
+| Package | Role |
+|---|---|
+| [`zto`](https://pub.dev/packages/zto) | **This package.** Annotations (`@ZDto`, `@ZString`, validators…) + the runtime `Zto.parse()` / `ZtoSchema` validation engine. |
+| [`zto_generator`](https://pub.dev/packages/zto_generator) | `build_runner` code generator. Reads your annotated classes and emits the `ZtoSchema` constants (e.g. `$CreateUserDtoSchema`) used at runtime. Run it with `dart run build_runner build`. |
+| [`dart_frog_open_api`](https://pub.dev/packages/dart_frog_open_api) | OpenAPI/Swagger spec generator for [Dart Frog](https://dartfrog.vgv.dev). Consumes your `ZtoSchema`s to document routes — see [OpenAPI Integration](#openapi-integration). |
 
-dev_dependencies:
-  build_runner: ^2.4.0
-  zto_generator: ^0.1.0
+```
+@ZDto annotated class
+        │  zto_generator (build_runner)
+        ▼
+  $CreateUserDtoSchema  (ZtoSchema)
+        │                         │
+        │ zto                     │ dart_frog_open_api
+        ▼                         ▼
+  Zto.parse() validation    OpenAPI / Swagger docs
 ```
 
 ## Quick Start (3 Steps)
 
 ### Step 1: Define Your DTO
 
-Create a file `lib/dtos/user_dto.dart`:
+Create a file `lib/domain/dtos/user_dto.dart`:
 
 ```dart
 import 'package:zto/zto.dart';
@@ -93,10 +104,7 @@ This creates `user_dto.g.dart` with the schema constant `$CreateUserDtoSchema`.
 final body = await request.json() as Map<String, dynamic>;
 
 try {
-  final dto = $CreateUserDtoSchema.parse(
-    body,
-    CreateUserDto.fromMap,
-  ).refine(
+  final dto = $CreateUserDtoSchema.parse(body, CreateUserDto.fromMap).refine(
     (d) => d.age < 150,
     field: 'age',
     message: 'Age is unrealistic',
@@ -126,6 +134,77 @@ Done! You now have:
 - ✅ Null safety
 - ✅ Clear error messages
 
+## Class Annotations: `@ZDto`, `@ZEntity`, `@ZModel`
+
+A class becomes a Zto schema by annotating it with one of three **semantically
+equivalent** annotations. All three generate the exact same `ZtoSchema` — the
+only difference is *intent*, so the annotation documents which layer the type
+belongs to:
+
+| Annotation | Use for | Typical layer |
+|---|---|---|
+| `@ZDto` | Data transfer objects — transport/contract shapes (request & response bodies) | API boundary |
+| `@ZEntity` | Domain entities with business rules | Domain |
+| `@ZModel` | Persistable aggregates (not necessarily a database table) | Persistence |
+
+They share the same parameters:
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `description` | `String` | **required** | Shown in OpenAPI / Swagger UI |
+| `parseType` | `ParseType` | `ParseType.camelCase` | How field names map to JSON keys (see below) |
+| `deprecated` | `bool` | `false` | Marks the schema as deprecated in OpenAPI |
+
+```dart
+@ZDto(description: 'Create user request')
+class CreateUserDto with ZtoDto<CreateUserDto> { ... }
+
+@ZEntity(description: 'User domain entity')
+class UserEntity with ZtoDto<UserEntity> { ... }
+
+@ZModel(description: 'Persistable user aggregate')
+class UserModel with ZtoDto<UserModel> { ... }
+```
+
+> Because the three are equivalent, a field whose type is annotated with **any**
+> of them is auto-detected as a nested object — no `@ZObject()` needed.
+
+---
+## ParseType — Field Name Mapping
+
+`parseType` controls how Dart field names are converted to JSON map keys **when a
+field doesn't set an explicit `mapKey`**. Declare it once on the class annotation
+and it applies to every field of that class:
+
+| `ParseType` | Transformation | `firstName` becomes |
+|---|---|---|
+| `camelCase` *(default)* | none — used as-is | `firstName` |
+| `snakeCase` | camelCase → snake_case | `first_name` |
+| `pascalCase` | uppercases the first letter | `FirstName` |
+| `kebabCase` | camelCase → kebab-case | `first-name` |
+
+```dart
+@ZDto(description: 'User', parseType: ParseType.snakeCase)
+class UserDto with ZtoDto<UserDto> {
+  @ZString()
+  final String firstName;   // JSON key: first_name
+
+  @ZString()
+  final String lastName;    // JSON key: last_name
+}
+```
+
+**An explicit `mapKey` always wins** over `parseType` inference:
+
+```dart
+@ZDto(description: 'User', parseType: ParseType.snakeCase)
+class UserDto with ZtoDto<UserDto> {
+  @ZString(mapKey: 'email_address')  // overrides snake_case inference
+  final String email;                // JSON key: email_address
+}
+```
+
+---
 ## Field Types
 
 ### Strings
@@ -147,7 +226,7 @@ final String username;
 - `@ZUrl()` — Must be a valid URL
 - `@ZRegex(pattern)` — Must match regex pattern
 - `@ZPattern(pattern)` — Alias for @ZRegex
-
+---
 ### Numbers
 
 ```dart
@@ -166,7 +245,7 @@ final double price;
 - `@ZMax(n)` — Number must be ≤ n
 - `@ZPositive()` — Number must be > 0
 - `@ZNegative()` — Number must be < 0
-
+---
 ### Enums
 
 ```dart
@@ -179,7 +258,7 @@ final Status status;
 @ZEnum(values: ['active', 'inactive', 'pending'])
 final Status status;
 ```
-
+---
 ### DateTime
 
 ```dart
@@ -189,7 +268,7 @@ final Status status;
 )
 final DateTime createdAt;
 ```
-
+---
 ### Nested Objects
 
 ```dart
@@ -205,7 +284,7 @@ class AddressDto {
 @ZObject()  // Auto-inferred from AddressDto type
 final AddressDto address;
 ```
-
+---
 ### Lists
 
 ```dart
@@ -215,7 +294,7 @@ final AddressDto address;
 )
 final List<AddressDto> addresses;
 ```
-
+---
 ## Advanced Usage
 
 ### Custom Validation with .refine()
@@ -266,7 +345,7 @@ try {
   }
 }
 ```
-
+---
 ## Common Patterns
 
 ### Create vs Update DTOs
@@ -331,7 +410,8 @@ class UserResponseDto {
 
 ### Nullability from Dart's `?` Suffix
 
-No need for `@ZNullable()` annotation:
+Nullability is inferred directly from the Dart `?` type suffix — there is no
+annotation for it:
 
 ```dart
 // This is nullable (optional)
@@ -356,7 +436,7 @@ final Color color;
 
 ### Nested DTO Auto-Detection
 
-Fields with `@ZDto` or `@ZEntity` types are automatically treated as objects:
+Fields whose type is annotated with `@ZDto`, `@ZEntity`, or `@ZModel` are automatically treated as objects:
 
 ```dart
 @ZObject()  // Not needed anymore
@@ -389,10 +469,10 @@ test('validates user creation', () {
   );
 });
 ```
-
+---
 ## OpenAPI Integration
 
-Generate OpenAPI specs from your DTOs:
+Every `ZtoSchema` can be converted to an OpenAPI 3.0 schema with `DtoToOpenApi`:
 
 ```dart
 import 'package:zto/zto.dart';
@@ -400,6 +480,28 @@ import 'package:zto/zto.dart';
 final openApiSchema = DtoToOpenApi.convert($CreateUserDtoSchema);
 // Use in your OpenAPI spec builder
 ```
+
+### With Dart Frog — `dart_frog_open_api`
+
+For [Dart Frog](https://dartfrog.vgv.dev) apps, the
+[`dart_frog_open_api`](https://pub.dev/packages/dart_frog_open_api) package does this end-to-end: pass a
+`ZtoSchema` straight into its fluent route builder and it generates the full
+OpenAPI/Swagger document (request/response bodies, nested DTOs, validators) for
+you — no manual schema wiring.
+
+```dart
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
+
+// Describe a route using the zto schema as the request body contract:
+Api.path().post((op) => op
+    .summary('Create user')
+    .body($CreateUserDtoSchema)   // ← your zto schema
+    .response(201));
+```
+
+Under the hood it calls `DtoToOpenApi.convert` (and `OpenApiSchema.fromZto`) on
+the same schemas you already validate with, so your docs never drift from your
+validation rules.
 
 ## Complete Example
 
@@ -501,6 +603,63 @@ final dto = $DtoSchema.parse(data, Dto.fromMap)
 - **Code generation**: Run once with `dart run build_runner build`
 - **Runtime**: Validation is O(n) where n = number of fields
 - **No reflection**: Everything is compiled ahead of time
+
+## Production Recommendations
+
+In production, **never let validation details reach the client.** The `issues`
+inside a `ZtoException` expose your internal field names, map keys, and business
+rules — that's information disclosure that helps an attacker probe your API.
+Treat the detailed `ZtoException` as a **backend-only** signal: it should flow
+exclusively to your logs / analytics, never into the HTTP response body.
+
+**Rule of thumb:** the client always gets the same **generic** error message; the
+full detail goes only to your observability pipeline.
+
+```dart
+import 'dart:io';
+import 'package:dart_frog/dart_frog.dart';
+// import your logger (talker) / analytics client
+
+Future<Response> onRequest(RequestContext context) async {
+  final body = await context.request.json() as Map<String, dynamic>;
+
+  try {
+    final dto = $CreateUserDtoSchema.parse(body, CreateUserDto.fromMap);
+    // ... use dto
+    return Response.json(body: {'ok': true});
+  } on ZtoException catch (e, stack) {
+    // ✅ Detailed issues go ONLY to logs / analytics — never to the client.
+    talker.warning('Validation failed', e, stack);
+    analytics.track('validation_failed', {
+      'route': context.request.uri.path,
+      'issues': e.issues.map((i) => i.toMap()).toList(),
+    });
+
+    // ✅ Client receives a generic message with no internal detail.
+    return Response.json(
+      statusCode: HttpStatus.unprocessableEntity, // 422
+      body: {'message': 'Invalid request.'},
+    );
+  }
+}
+```
+
+**Do**
+- Return one fixed, generic message (e.g. `'Invalid request.'`) for every
+  validation failure.
+- Forward `e.issues` (or `e.toMap()`) only to logs / analytics on the backend.
+- Use a single shared error handler / middleware so no route accidentally leaks
+  `issues`.
+
+**Don't**
+- Serialize `e.issues` / `e.toMap()` into the response sent to the client.
+- Echo back field names, regex patterns, or the offending value.
+- Configure `Zto.errorFormatter` to build a *client-facing* payload from
+  `issues` — keep that formatter for your internal logging only.
+
+> The defaults (`ZtoException.toMap()` / `_defaultFormat`) include the full
+> `errors` list precisely so you can pipe it to logging. Make the conscious
+> choice to strip it before responding to the client.
 
 ## License
 

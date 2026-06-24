@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:test/test.dart';
 import 'package:dart_frog_open_api/dart_frog_open_api.dart';
@@ -7,8 +6,7 @@ void main() {
   group('PostmanCollectionBuilder', () {
     test('builds a basic Postman collection from pathSchemas', () {
       final builder = PostmanCollectionBuilder(
-        info: const OpenApiInfo(title: 'My API', version: '1.0.0'),
-        baseUrl: 'http://localhost:8080',
+        info: const OpenApiInfo(title: 'My API'),
         pathSchemas: {
           '/hello': PathSchema(
             get: OperationSchema(
@@ -47,7 +45,7 @@ void main() {
 
       final request = endpoint['request'] as Map<String, dynamic>;
       expect(request['method'], equals('GET'));
-      
+
       final url = request['url'] as Map<String, dynamic>;
       expect(url['raw'], equals('{{baseUrl}}/hello'));
     });

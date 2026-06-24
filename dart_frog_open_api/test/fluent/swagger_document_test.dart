@@ -3,35 +3,47 @@ import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:zto/zto.dart';
 
-import '../../lib/dart_frog_open_api.dart';
+import 'package:dart_frog_open_api/dart_frog_open_api.dart';
 
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 const $createUserDtoSchema = ZtoSchema(
   typeName: 'CreateUserDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'name'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'name'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $userResponseDtoSchema = ZtoSchema(
   typeName: 'UserResponseDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'id'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'id'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $orderEventDtoSchema = ZtoSchema(
   typeName: 'OrderEventDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'status'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'status'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
 const $wsMessageDtoSchema = ZtoSchema(
   typeName: 'WsMessageDto',
   descriptors: [
-    FieldDescriptor(fieldAnnotation: ZString(mapKey: 'type'), validators: [], isNullable: false),
+    FieldDescriptor(
+        fieldAnnotation: ZString(mapKey: 'type'),
+        validators: [],
+        isNullable: false),
   ],
 );
 
@@ -40,16 +52,12 @@ const $wsMessageDtoSchema = ZtoSchema(
 Map<String, dynamic> _fullSpec() => OpenApiBuilder(
       info: const OpenApiInfo(
         title: 'Paipfood API',
-        version: '1.0.0',
         description: 'Documento completo de teste.',
         servers: ['https://api.paipfood.com'],
       ),
       pathSchemas: {
         '/v1/users': Api.path()
-            .get((op) => op
-                .summary('Listar')
-                .security(['BearerAuth'])
-                .ok(
+            .get((op) => op.summary('Listar').security(['BearerAuth']).ok(
                   listOfZtoSchema: $userResponseDtoSchema,
                   headers: const [
                     ResHeader('X-Total-Count', ParamType.integer,
@@ -81,8 +89,10 @@ Map<String, dynamic> _fullSpec() => OpenApiBuilder(
             .delete((op) => op.summary('Remover').public().noContent())
             .build(),
         '/v1/health': Api.path()
-            .get((op) => op.summary('Health').public().response(200,
-                json: const {'status': 'ok', 'uptime': 12}))
+            .get((op) => op
+                .summary('Health')
+                .public()
+                .response(200, json: const {'status': 'ok', 'uptime': 12}))
             .build(),
         '/v1/invoices/{id}/pdf': Api.path()
             .get((op) => op
@@ -133,7 +143,11 @@ void main() {
       expect(spec['openapi'], equals('3.0.0'));
       expect(spec['info']['title'], equals('Paipfood API'));
       expect(spec['info']['version'], equals('1.0.0'));
-      expect(spec['servers'], equals([{'url': 'https://api.paipfood.com'}]));
+      expect(
+          spec['servers'],
+          equals([
+            {'url': 'https://api.paipfood.com'}
+          ]));
       expect((spec['paths'] as Map).length, equals(6));
       expect(spec['components'], isA<Map>());
     });
@@ -147,7 +161,11 @@ void main() {
 
       // A operação protegida referencia o scheme.
       final post = spec['paths']['/v1/users']['post'] as Map;
-      expect(post['security'], equals([{'BearerAuth': <String>[]}]));
+      expect(
+          post['security'],
+          equals([
+            {'BearerAuth': <String>[]}
+          ]));
     });
 
     test('todo \$ref do documento resolve para um componente existente', () {
@@ -196,7 +214,8 @@ void main() {
           equals((spec['components']['schemas'] as Map).keys.toSet()));
     });
 
-    test('todos os DTOs referenciados estão registrados (lista + item + body)', () {
+    test('todos os DTOs referenciados estão registrados (lista + item + body)',
+        () {
       final spec = _fullSpec();
       final schemas = (spec['components']['schemas'] as Map).keys.toSet();
       expect(

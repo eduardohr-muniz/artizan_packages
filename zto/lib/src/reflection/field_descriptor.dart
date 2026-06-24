@@ -15,7 +15,7 @@ class FieldDescriptor {
   /// All validator annotations (`@ZMin`, `@ZEmail`, etc.) on this field.
   final List<ZtoValidator> validators;
 
-  /// Whether the field is marked `@Nullable()`.
+  /// Whether the field is nullable (inferred from Dart's `?` type suffix).
   final bool isNullable;
 
   /// Shorthand for the JSON key from [fieldAnnotation].

@@ -26,8 +26,10 @@ _MockRequestContext _ctx(
 
 void main() {
   group('openApiJsonHandler — security', () {
-    test('returns 404 when SecurityConfig.enabled is false (default)', () async {
-      final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+    test('returns 404 when SecurityConfig.enabled is false (default)',
+        () async {
+      final openApi = DartFrogOpenApi(
+          config: const OpenApiConfig(
         info: OpenApiInfo(title: 'T', version: '1.0'),
       ));
 
@@ -39,7 +41,8 @@ void main() {
     });
 
     test('returns 200 when enabled is true and no guard', () async {
-      final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+      final openApi = DartFrogOpenApi(
+          config: const OpenApiConfig(
         info: OpenApiInfo(title: 'T', version: '1.0'),
         security: SecurityConfig(enabled: true),
       ));
@@ -52,7 +55,8 @@ void main() {
     });
 
     test('returns 403 when enabled but guard returns false', () async {
-      final openApi = DartFrogOpenApi(config: OpenApiConfig(
+      final openApi = DartFrogOpenApi(
+          config: OpenApiConfig(
         info: const OpenApiInfo(title: 'T', version: '1.0'),
         security: SecurityConfig(enabled: true, guard: (_) => false),
       ));
@@ -65,7 +69,8 @@ void main() {
     });
 
     test('returns 200 when enabled and guard returns true', () async {
-      final openApi = DartFrogOpenApi(config: OpenApiConfig(
+      final openApi = DartFrogOpenApi(
+          config: OpenApiConfig(
         info: const OpenApiInfo(title: 'T', version: '1.0'),
         security: SecurityConfig(enabled: true, guard: (_) => true),
       ));
@@ -79,7 +84,8 @@ void main() {
 
     group('CORS', () {
       test('no CORS headers when corsOrigins is null', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           security: SecurityConfig(enabled: true),
         ));
@@ -88,11 +94,13 @@ void main() {
         final ctx = _ctx(request, headers: {'Origin': 'http://localhost:3000'});
         final response = await openApi.openApiJsonHandler()(ctx);
 
-        expect(response.headers.containsKey('access-control-allow-origin'), isFalse);
+        expect(response.headers.containsKey('access-control-allow-origin'),
+            isFalse);
       });
 
       test('CORS header is set for allowed origin', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           security: SecurityConfig(
             enabled: true,
@@ -104,11 +112,13 @@ void main() {
         final ctx = _ctx(request, headers: {'Origin': 'http://localhost:3000'});
         final response = await openApi.openApiJsonHandler()(ctx);
 
-        expect(response.headers['access-control-allow-origin'], equals('http://localhost:3000'));
+        expect(response.headers['access-control-allow-origin'],
+            equals('http://localhost:3000'));
       });
 
       test('CORS header is never wildcard *', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           security: SecurityConfig(
             enabled: true,
@@ -120,11 +130,13 @@ void main() {
         final ctx = _ctx(request, headers: {'Origin': 'http://localhost:3000'});
         final response = await openApi.openApiJsonHandler()(ctx);
 
-        expect(response.headers['access-control-allow-origin'], isNot(equals('*')));
+        expect(response.headers['access-control-allow-origin'],
+            isNot(equals('*')));
       });
 
       test('no CORS header for origin not in allowlist', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           security: SecurityConfig(
             enabled: true,
@@ -136,14 +148,16 @@ void main() {
         final ctx = _ctx(request, headers: {'Origin': 'https://evil.com'});
         final response = await openApi.openApiJsonHandler()(ctx);
 
-        expect(response.headers.containsKey('access-control-allow-origin'), isFalse);
+        expect(response.headers.containsKey('access-control-allow-origin'),
+            isFalse);
       });
     });
   });
 
   group('swaggerUiHandler — security', () {
     test('returns 404 when enabled is false', () async {
-      final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+      final openApi = DartFrogOpenApi(
+          config: const OpenApiConfig(
         info: OpenApiInfo(title: 'T', version: '1.0'),
       ));
 
@@ -155,7 +169,8 @@ void main() {
     });
 
     test('returns 200 when enabled', () async {
-      final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+      final openApi = DartFrogOpenApi(
+          config: const OpenApiConfig(
         info: OpenApiInfo(title: 'T', version: '1.0'),
         security: SecurityConfig(enabled: true),
       ));
@@ -169,9 +184,10 @@ void main() {
 
     group('security headers', () {
       test('includes X-Content-Type-Options: nosniff', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
-          security: SecurityConfig(enabled: true, securityHeaders: true),
+          security: SecurityConfig(enabled: true),
         ));
 
         final request = _MockRequest();
@@ -182,9 +198,10 @@ void main() {
       });
 
       test('includes X-Frame-Options: DENY', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
-          security: SecurityConfig(enabled: true, securityHeaders: true),
+          security: SecurityConfig(enabled: true),
         ));
 
         final request = _MockRequest();
@@ -195,9 +212,10 @@ void main() {
       });
 
       test('includes Content-Security-Policy', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
-          security: SecurityConfig(enabled: true, securityHeaders: true),
+          security: SecurityConfig(enabled: true),
         ));
 
         final request = _MockRequest();
@@ -205,11 +223,13 @@ void main() {
         final response = await openApi.swaggerUiHandler()(ctx);
 
         expect(response.headers['content-security-policy'], isNotNull);
-        expect(response.headers['content-security-policy'], contains('unpkg.com'));
+        expect(
+            response.headers['content-security-policy'], contains('unpkg.com'));
       });
 
       test('no security headers when securityHeaders is false', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           security: SecurityConfig(enabled: true, securityHeaders: false),
         ));
@@ -224,8 +244,10 @@ void main() {
     });
 
     group('XSS prevention', () {
-      test('specUrl with script injection is sanitized in HTML output', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+      test('specUrl with script injection is sanitized in HTML output',
+          () async {
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(title: 'T', version: '1.0'),
           specUrl: '"/><script>alert(1)</script>',
           security: SecurityConfig(enabled: true),
@@ -240,7 +262,8 @@ void main() {
       });
 
       test('info.title with HTML tags is escaped in HTML output', () async {
-        final openApi = DartFrogOpenApi(config: const OpenApiConfig(
+        final openApi = DartFrogOpenApi(
+            config: const OpenApiConfig(
           info: OpenApiInfo(
             title: '<img src=x onerror=alert(1)>',
             version: '1.0',

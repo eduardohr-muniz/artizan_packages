@@ -28,12 +28,11 @@ class OpenApiBuilder {
     required this.info,
     Map<String, PathSchema>? pathSchemas,
     Map<String, SecurityScheme>? securitySchemes,
-    List<String>? globalSecurity,
+    this.globalSecurity,
     List<ScalarEnvironment>? scalarEnvironments,
     this.scalarActiveEnvironment,
   })  : pathSchemas = pathSchemas ?? const {},
         securitySchemes = securitySchemes ?? const {},
-        globalSecurity = globalSecurity,
         scalarEnvironments = scalarEnvironments ?? const [];
 
   static const _defaultBearerScheme = SecurityScheme.bearer;

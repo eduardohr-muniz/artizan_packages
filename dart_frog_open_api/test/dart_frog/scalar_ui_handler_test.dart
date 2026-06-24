@@ -4,9 +4,8 @@ import 'package:dart_frog/dart_frog.dart' as frog;
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-import '../../lib/src/dart_frog/scalar_ui_handler.dart' as scalar;
-import '../../lib/src/open_api_builder/scalar_options.dart';
-import '../../lib/src/security/security_config.dart';
+import 'package:dart_frog_open_api/src/dart_frog/scalar_ui_handler.dart' as scalar;
+import 'package:dart_frog_open_api/src/open_api_builder/scalar_options.dart';
 
 class _MockRequestContext extends Mock implements frog.RequestContext {}
 
@@ -88,12 +87,12 @@ void main() {
       );
     });
 
-    test('sets security response headers when securityHeaders enabled', () async {
+    test('sets security response headers when securityHeaders enabled',
+        () async {
       when(() => request.method).thenReturn(frog.HttpMethod.get);
       when(() => request.headers).thenReturn({});
 
-      const security = SecurityConfig(securityHeaders: true);
-      final handler = scalar.scalarUiHandler(security: security);
+      final handler = scalar.scalarUiHandler();
       final response = await handler(ctx);
 
       expect(response.headers['x-content-type-options'], equals('nosniff'));

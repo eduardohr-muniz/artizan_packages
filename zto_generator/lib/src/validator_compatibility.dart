@@ -81,7 +81,9 @@ const Map<String, Set<String>> validatorCompatibility = {
 /// Human-readable field types that [validatorName] applies to (for error messages).
 String allowedFieldTypesForValidator(String validatorName) {
   if (_stringValidators.contains(validatorName)) return 'String';
-  if (_numericValidators.contains(validatorName)) return 'numeric (ZInt, ZDouble, ZNum)';
+  if (_numericValidators.contains(validatorName)) {
+    return 'numeric (ZInt, ZDouble, ZNum)';
+  }
   if (_dateValidators.contains(validatorName)) return 'Date';
   return 'compatible';
 }

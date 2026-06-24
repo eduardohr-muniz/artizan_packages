@@ -5,8 +5,7 @@ void main() {
   group('BrunoCollectionBuilder', () {
     test('builds a basic Bruno collection from pathSchemas', () {
       final builder = BrunoCollectionBuilder(
-        info: const OpenApiInfo(title: 'My API', version: '1.0.0'),
-        baseUrl: 'http://localhost:8080',
+        info: const OpenApiInfo(title: 'My API'),
         pathSchemas: {
           '/hello': PathSchema(
             get: OperationSchema(

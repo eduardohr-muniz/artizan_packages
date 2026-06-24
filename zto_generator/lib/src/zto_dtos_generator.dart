@@ -30,7 +30,8 @@ class ZtoDtosGenerator extends GeneratorForAnnotation<ZtoDtos> {
       final classElem = type.element;
       if (classElem is! ClassElement) continue;
 
-      final schemaCode = generateSchemaForClass(classElem, includeRegistration: false);
+      final schemaCode =
+          generateSchemaForClass(classElem, includeRegistration: false);
       schemas.add(schemaCode);
 
       final className = classElem.name;
@@ -39,7 +40,9 @@ class ZtoDtosGenerator extends GeneratorForAnnotation<ZtoDtos> {
     }
 
     final schemaBlocks = schemas.join('\n\n');
-    final entries = registrations.map((r) => '  (${r.className}, ${r.schemaName}),').join('\n');
+    final entries = registrations
+        .map((r) => '  (${r.className}, ${r.schemaName}),')
+        .join('\n');
 
     return '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
