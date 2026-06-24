@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/zto_banner.png" alt="ZTO Banner" style="width: 100%; aspect-ratio: 5/2; object-fit: cover;">
+  <img src="https://raw.githubusercontent.com/eduardohr-muniz/artizan_packages/main/zto/assets/zto_banner.png" alt="ZTO Banner" style="width: 100%; aspect-ratio: 5/2; object-fit: cover;">
 </p>
 
 # ZTO - Zero Friction DTO Validation
@@ -51,7 +51,7 @@ import 'package:zto/zto.dart';
 part 'user_dto.g.dart';  // Generated validation code
 
 @ZDto(description: 'Request to create a user')
-class CreateUserDto with ZtoDto<CreateUserDto> {
+class CreateUserDto {
   @ZString(description: 'User full name', example: 'John Doe')
   @ZMinLength(2)
   @ZMaxLength(100)
@@ -157,13 +157,13 @@ They share the same parameters:
 
 ```dart
 @ZDto(description: 'Create user request')
-class CreateUserDto with ZtoDto<CreateUserDto> { ... }
+class CreateUserDto { ... }
 
 @ZEntity(description: 'User domain entity')
-class UserEntity with ZtoDto<UserEntity> { ... }
+class UserEntity { ... }
 
 @ZModel(description: 'Persistable user aggregate')
-class UserModel with ZtoDto<UserModel> { ... }
+class UserModel { ... }
 ```
 
 > Because the three are equivalent, a field whose type is annotated with **any**
@@ -185,7 +185,7 @@ and it applies to every field of that class:
 
 ```dart
 @ZDto(description: 'User', parseType: ParseType.snakeCase)
-class UserDto with ZtoDto<UserDto> {
+class UserDto {
   @ZString()
   final String firstName;   // JSON key: first_name
 
@@ -198,7 +198,7 @@ class UserDto with ZtoDto<UserDto> {
 
 ```dart
 @ZDto(description: 'User', parseType: ParseType.snakeCase)
-class UserDto with ZtoDto<UserDto> {
+class UserDto {
   @ZString(mapKey: 'email_address')  // overrides snake_case inference
   final String email;                // JSON key: email_address
 }
@@ -513,7 +513,7 @@ import 'package:zto/zto.dart';
 part 'user_dto.g.dart';
 
 @ZDto(description: 'Create a new user')
-class CreateUserDto with ZtoDto<CreateUserDto> {
+class CreateUserDto {
   @ZString(description: 'Full name', example: 'Alice Smith')
   @ZMinLength(2)
   final String name;
