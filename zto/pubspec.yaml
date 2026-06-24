@@ -1,7 +1,7 @@
 name: zto
 description: Annotation-based DTO validation and OpenAPI schema generation for
   Dart server-side.
-version: 0.1.0
+version: 0.1.1
 
 repository: https://github.com/eduardohr-muniz/artizan_packages
 homepage: https://github.com/eduardohr-muniz/artizan_packages/tree/main/zto
