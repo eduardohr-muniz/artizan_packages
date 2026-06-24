@@ -207,94 +207,84 @@ class UserDto {
 ---
 ## Field Types
 
-### Strings
+Annotate **one** type per field. Every type annotation shares these params: `mapKey`
+(explicit JSON key), `description` and `example` (shown in OpenAPI/Swagger), `failMessage`
+(custom type-mismatch message), and `deprecated`.
 
-```dart
-@ZString(
-  description: 'Username',
-  example: 'johndoe',
-  failMessage: 'Invalid username format',
-)
-final String username;
-```
+| Annotation | Dart type | Example |
+|---|---|---|
+| `@ZString` | `String` | `@ZString(description: 'Full name', example: 'Alice')` |
+| `@ZInt` | `int` | `@ZInt(description: 'Age in years', example: 25)` |
+| `@ZDouble` | `double` | `@ZDouble(description: 'Unit price', example: 9.99)` |
+| `@ZNum` | `num` | `@ZNum(description: 'Score', example: 87.5)` |
+| `@ZBool` | `bool` | `@ZBool(description: 'Whether active', example: true)` |
+| `@ZDate` | `DateTime` | `@ZDate(description: 'Created at', example: '2024-03-15T10:00:00Z')` |
+| `@ZFile` | upload | `@ZFile(description: 'Profile image')` |
+| `@ZEnum` | enum / `String` | `@ZEnum(values: ['admin', 'editor', 'viewer'], description: 'Role')` |
+| `@ZMap` | `Map<String, dynamic>` | `@ZMap(description: 'Raw metadata')` |
+| `@ZMetaData` | `Map<String, dynamic>` | `@ZMetaData(description: 'User metadata', example: {'plan': 'pro'})` |
+| `@ZList` | `List<primitive>` | `@ZList(itemType: ZString, description: 'List of tags')` |
+| `@ZListOf` | `List<NestedDto>` | `@ZListOf(dtoType: AddressDto, description: 'Addresses')` |
+| `@ZObj` | nested DTO (explicit) | `@ZObj(dtoType: AddressDto, description: 'Billing address')` |
+| `@ZObject` | nested DTO (inferred) | `@ZObject(description: 'Address')` — type read from the field |
 
-**Available validators:**
-- `@ZMinLength(n)` — String must be at least n characters
-- `@ZMaxLength(n)` — String must be at most n characters
-- `@ZLength(n)` — String must be exactly n characters
-- `@ZEmail()` — Must be a valid email
-- `@ZUrl()` — Must be a valid URL
-- `@ZRegex(pattern)` — Must match regex pattern
-- `@ZPattern(pattern)` — Alias for @ZRegex
----
-### Numbers
+- **`@ZEnum`** — on an enum-typed field the generator infers `values` from the enum; pass
+  `values: [...]` explicitly for a plain `String` field.
+- **`@ZList`** takes a **`ZtoField` type** in `itemType` (e.g. `ZString`, `ZInt`) — for a
+  list of nested DTOs use `@ZListOf` instead.
+- **`@ZListOf` / `@ZObj`** take either `dtoSchema:` (the generated `$Schema`) or `dtoType:`
+  (the DTO class, looked up from the registry). For a single nested field, prefer `@ZObject`
+  — it infers the type from the declaration, so no `dtoType`/`dtoSchema` is needed.
 
-```dart
-@ZInt(description: 'Age', example: 25)
-@ZMin(0)
-@ZMax(150)
-final int age;
+## Validators
 
-@ZDouble(description: 'Price in USD', example: 99.99)
-@ZPositive()
-final double price;
-```
+Stack validators **below** the type annotation. They run at parse time and collect **all**
+failures (they don't stop at the first). Every validator accepts an optional `message:` to
+override the default error. The build fails with a clear error if a validator is
+incompatible with the field type (e.g. `@ZEmail` on a `@ZDouble`).
 
-**Available validators:**
-- `@ZMin(n)` — Number must be ≥ n
-- `@ZMax(n)` — Number must be ≤ n
-- `@ZPositive()` — Number must be > 0
-- `@ZNegative()` — Number must be < 0
----
-### Enums
+**String** (under `@ZString`):
 
-```dart
-enum Status { active, inactive, pending }
+| Validator | Passes ✓ / Fails ✗ |
+|---|---|
+| `@ZMinLength(2)` | `'abc'` ✓ / `'a'` ✗ |
+| `@ZMaxLength(10)` | `'hello'` ✓ / `'hello world!'` ✗ |
+| `@ZLength(5)` | `'12345'` ✓ / `'1234'` ✗ |
+| `@ZEmail()` | `'a@b.com'` ✓ / `'invalid'` ✗ |
+| `@ZUuid()` | `'550e8400-e29b-41d4-a716-446655440000'` ✓ / `'x'` ✗ |
+| `@ZUrl()` | `'https://example.com'` ✓ / `'not-a-url'` ✗ |
+| `@ZHttpUrl()` | `'https://x.com'` ✓ / `'ftp://x.com'` ✗ |
+| `@ZPattern(r'^[a-z]+$')` | `'abc'` ✓ / `'Abc'` ✗ |
+| `@ZStartsWith('https://')` | `'https://x.com'` ✓ / `'http://x.com'` ✗ |
+| `@ZEndsWith('.com')` | `'site.com'` ✓ / `'site.org'` ✗ |
+| `@ZIncludes('foo')` | `'hello foo'` ✓ / `'hello bar'` ✗ |
+| `@ZBase64()` | `'SGVsbG8='` ✓ / `'!!!'` ✗ |
+| `@ZHex()` | `'deadbeef'` ✓ / `'ghijk'` ✗ |
+| `@ZIpv4()` | `'192.168.1.1'` ✓ / `'256.1.1.1'` ✗ |
+| `@ZIpv6()` | `'2001:0db8::1'` ✓ / `'invalid'` ✗ |
+| `@ZJwt()` | `'a.b.c'` ✓ / `'a.b'` ✗ |
+| `@ZIsoDate()` | `'2024-03-15'` ✓ / `'2024-13-01'` ✗ |
+| `@ZIsoDateTime()` | `'2024-03-15T10:00:00Z'` ✓ / `'2024-03-15'` ✗ |
+| `@ZUppercase()` | `'ABC'` ✓ / `'Abc'` ✗ |
+| `@ZLowercase()` | `'abc'` ✓ / `'Abc'` ✗ |
+| `@ZSlug()` | `'my-blog-post'` ✓ / `'Invalid Slug!'` ✗ |
+| `@ZAlphanumeric()` | `'abc123'` ✓ / `'abc-123'` ✗ |
 
-@ZEnum()  // Values automatically inferred from enum
-final Status status;
+**Numeric** (under `@ZInt` / `@ZDouble` / `@ZNum`; `@ZMin`/`@ZMax` also work on `@ZDate`):
 
-// Or explicit:
-@ZEnum(values: ['active', 'inactive', 'pending'])
-final Status status;
-```
----
-### DateTime
+| Validator | Passes ✓ / Fails ✗ |
+|---|---|
+| `@ZMin(18)` | `18`, `25` ✓ / `17` ✗ |
+| `@ZMax(120)` | `100`, `120` ✓ / `121` ✗ |
+| `@ZPositive()` | `1` ✓ / `0`, `-1` ✗ |
+| `@ZNegative()` | `-5` ✓ / `5` ✗ |
+| `@ZNonNegative()` | `0`, `1` ✓ / `-1` ✗ |
+| `@ZNonPositive()` | `0`, `-5` ✓ / `1` ✗ |
+| `@ZMultipleOf(5)` | `10`, `15` ✓ / `12` ✗ |
+| `@ZInteger()` | `10` ✓ / `9.99` ✗ |
+| `@ZFinite()` | `42` ✓ / `infinity`, `nan` ✗ |
+| `@ZSafeInt()` | `9007199254740991` ✓ / `9007199254740992` ✗ |
 
-```dart
-@ZDate(
-  description: 'Account created date',
-  example: '2024-01-01T00:00:00Z',
-)
-final DateTime createdAt;
-```
----
-### Nested Objects
-
-```dart
-@ZDto(description: 'User address')
-class AddressDto {
-  @ZString(description: 'Street')
-  final String street;
-  
-  // ...
-}
-
-// In parent DTO:
-@ZObject()  // Auto-inferred from AddressDto type
-final AddressDto address;
-```
----
-### Lists
-
-```dart
-@ZList(
-  itemType: AddressDto,
-  description: 'List of addresses',
-)
-final List<AddressDto> addresses;
-```
----
 ## Advanced Usage
 
 ### Custom Validation with .refine()
