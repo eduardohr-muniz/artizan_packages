@@ -357,6 +357,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.11.3",
+  "generatorVersion": "3.12.2",
+  "flutterRoot": "file:///Users/eduardomuniz/.puro/envs/stable/flutter",
+  "flutterVersion": "3.44.5",
   "pubCache": "file:///Users/eduardomuniz/.puro/shared/pub_cache"
 }
