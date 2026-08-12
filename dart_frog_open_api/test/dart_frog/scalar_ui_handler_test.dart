@@ -87,6 +87,27 @@ void main() {
       );
     });
 
+    test('emits tagsSorter "alpha" by default in data-configuration', () async {
+      when(() => request.method).thenReturn(frog.HttpMethod.get);
+
+      final handler = scalar.scalarUiHandler();
+      final response = await handler(ctx);
+      final body = await response.body();
+
+      expect(body, contains('&quot;tagsSorter&quot;:&quot;alpha&quot;'));
+    });
+
+    test('omits tagsSorter when set to null', () async {
+      when(() => request.method).thenReturn(frog.HttpMethod.get);
+
+      const options = ScalarOptions(tagsSorter: null);
+      final handler = scalar.scalarUiHandler(options: options);
+      final response = await handler(ctx);
+      final body = await response.body();
+
+      expect(body, isNot(contains('tagsSorter')));
+    });
+
     test('sets security response headers when securityHeaders enabled',
         () async {
       when(() => request.method).thenReturn(frog.HttpMethod.get);
