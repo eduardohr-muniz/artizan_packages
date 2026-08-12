@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2]
+
+### Added
+
+- Top-level `tags` list in the generated OpenAPI spec, sorted alphabetically
+  (case-insensitive), so tag groups are auto-grouped and ordered in Scalar /
+  Swagger UI
+
 ## [0.1.1]
  - **UPDATE README**
 ## [0.1.0]

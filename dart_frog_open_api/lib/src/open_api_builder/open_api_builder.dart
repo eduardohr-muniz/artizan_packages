@@ -63,6 +63,7 @@ class OpenApiBuilder {
     var hasProtectedRoute = false;
     final seenOperationIds = <String>{};
     final referencedSchemes = <String>{};
+    final usedTags = <String>{};
 
     for (final entry in pathSchemas.entries) {
       final pathName = entry.key;
@@ -96,6 +97,8 @@ class OpenApiBuilder {
             'summary or path.',
           );
         }
+
+        usedTags.addAll((operation['tags'] as List).cast<String>());
 
         pathItem[methodName] = operation;
       }
@@ -152,6 +155,11 @@ class OpenApiBuilder {
       if (info.servers.isNotEmpty) 'servers': _buildServers(),
       if (globalSecurity != null && globalSecurity!.isNotEmpty)
         'security': globalSecurity!.map((name) => {name: <String>[]}).toList(),
+      if (usedTags.isNotEmpty)
+        'tags': (usedTags.toList()
+              ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())))
+            .map((name) => {'name': name})
+            .toList(),
       'paths': paths,
       if (components.isNotEmpty) 'components': components,
       if (scalarEnvironments.isNotEmpty)
