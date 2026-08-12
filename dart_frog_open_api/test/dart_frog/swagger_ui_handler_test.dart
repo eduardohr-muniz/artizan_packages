@@ -55,35 +55,28 @@ void main() {
       expect(body, contains('docExpansion: "list"'));
     });
 
-    test('honours docExpansion "none" (fully minimized)', () async {
+    test('honours SwaggerDocExpansion.none (fully minimized)', () async {
       when(() => request.method).thenReturn(frog.HttpMethod.get);
 
-      final handler = swagger.swaggerUiHandler(docExpansion: 'none');
+      final handler = swagger.swaggerUiHandler(
+        docExpansion: swagger.SwaggerDocExpansion.none,
+      );
       final response = await handler(ctx);
       final body = await response.body();
 
       expect(body, contains('docExpansion: "none"'));
     });
 
-    test('honours docExpansion "full" (fully expanded)', () async {
+    test('honours SwaggerDocExpansion.full (fully expanded)', () async {
       when(() => request.method).thenReturn(frog.HttpMethod.get);
 
-      final handler = swagger.swaggerUiHandler(docExpansion: 'full');
+      final handler = swagger.swaggerUiHandler(
+        docExpansion: swagger.SwaggerDocExpansion.full,
+      );
       final response = await handler(ctx);
       final body = await response.body();
 
       expect(body, contains('docExpansion: "full"'));
-    });
-
-    test('falls back to "list" for an invalid docExpansion value', () async {
-      when(() => request.method).thenReturn(frog.HttpMethod.get);
-
-      final handler = swagger.swaggerUiHandler(docExpansion: 'bogus');
-      final response = await handler(ctx);
-      final body = await response.body();
-
-      expect(body, contains('docExpansion: "list"'));
-      expect(body, isNot(contains('bogus')));
     });
 
     test('sorts tags and operations alphabetically', () async {

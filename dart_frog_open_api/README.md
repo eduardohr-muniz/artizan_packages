@@ -221,6 +221,41 @@ factories. Use `.public()` on an operation to opt it out of `globalSecurity`.
 - **Swagger UI** — `openApi.swaggerUiHandler()`
 - **Scalar UI** — `openApi.scalarUiHandler()` (optionally `scalarUiHandler(options: ScalarOptions(...))`)
 
+Both UIs sort tag groups alphabetically by default, so the sidebar order stays stable
+regardless of route-scan order. (Scalar does not honour the top-level `tags` ordering on
+its own — the sorting is applied via its configuration.)
+
+### Expand / collapse sections (Swagger UI)
+
+Control how much of the document Swagger UI expands on first load with the
+`SwaggerDocExpansion` enum:
+
+```dart
+// Everything collapsed (fully minimized)
+openApi.swaggerUiHandler(docExpansion: SwaggerDocExpansion.none);
+
+// Tag groups open, operations collapsed (default)
+openApi.swaggerUiHandler(docExpansion: SwaggerDocExpansion.list);
+
+// Tag groups and operations expanded
+openApi.swaggerUiHandler(docExpansion: SwaggerDocExpansion.full);
+```
+
+### Sidebar ordering (Scalar UI)
+
+`ScalarOptions` exposes the sort order via enums (default: alphabetical). Pass `null` to
+preserve the order tags/operations appear in the spec:
+
+```dart
+openApi.scalarUiHandler(
+  options: const ScalarOptions(
+    tagsSorter: ScalarTagsSorter.alpha,            // or null to keep spec order
+    operationsSorter: ScalarOperationsSorter.alpha, // or .method / null
+    defaultOpenAllTags: true,                       // start with all groups expanded
+  ),
+);
+```
+
 Scalar supports named environments with `{{variable}}` substitution in the "Try it" panel:
 
 ```dart

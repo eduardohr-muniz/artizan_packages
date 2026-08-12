@@ -93,7 +93,10 @@ class DartFrogOpenApi {
   ///
   /// Returns **404** when [SecurityConfig.enabled] is `false`.
   /// Returns **403** when the guard function denies the request.
-  Handler swaggerUiHandler({String docExpansion = 'list'}) {
+  Handler swaggerUiHandler({
+    ui_handler.SwaggerDocExpansion docExpansion =
+        ui_handler.SwaggerDocExpansion.list,
+  }) {
     return (RequestContext context) {
       final check = _checkAccess(context.request, config);
       if (check != null) return check;
