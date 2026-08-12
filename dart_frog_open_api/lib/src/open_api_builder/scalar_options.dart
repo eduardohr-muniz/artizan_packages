@@ -2,6 +2,31 @@
 // Supporting types
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// How the tag groups are ordered in the Scalar sidebar.
+enum ScalarTagsSorter {
+  /// Sort tag groups alphabetically.
+  alpha('alpha');
+
+  const ScalarTagsSorter(this.value);
+
+  /// The literal value emitted in the Scalar configuration.
+  final String value;
+}
+
+/// How the endpoints inside each Scalar tag group are ordered.
+enum ScalarOperationsSorter {
+  /// Sort endpoints alphabetically by summary.
+  alpha('alpha'),
+
+  /// Sort endpoints by HTTP method.
+  method('method');
+
+  const ScalarOperationsSorter(this.value);
+
+  /// The literal value emitted in the Scalar configuration.
+  final String value;
+}
+
 /// Default HTTP client shown in the code-snippet panel.
 ///
 /// [targetKey] examples: `'shell'`, `'node'`, `'python'`, `'ruby'`, `'php'`.
@@ -195,7 +220,7 @@ class ScalarOptions {
     this.showSidebar = true,
     this.defaultOpenAllTags = false,
     this.defaultOpenFirstTag = true,
-    this.tagsSorter = 'alpha',
+    this.tagsSorter = ScalarTagsSorter.alpha,
     this.operationsSorter,
     // ── Visibility toggles ────────────────────────────────────────────────────
     this.hideModels = false,
@@ -269,16 +294,17 @@ class ScalarOptions {
   /// Auto-open the first tag group on load. Defaults to `true`.
   final bool defaultOpenFirstTag;
 
-  /// How the tag groups are ordered in the sidebar. `'alpha'` (default) sorts
-  /// them alphabetically; `null` preserves the order tags appear in the spec.
+  /// How the tag groups are ordered in the sidebar.
+  /// [ScalarTagsSorter.alpha] (default) sorts them alphabetically; `null`
+  /// preserves the order tags appear in the spec.
   ///
   /// Scalar does **not** honour the top-level `tags` array ordering on its own,
   /// so this is what actually alphabetizes the sidebar groups.
-  final String? tagsSorter;
+  final ScalarTagsSorter? tagsSorter;
 
   /// How the endpoints inside each tag group are ordered.
-  /// `'alpha'` (by summary) or `'method'`. `null` preserves spec order.
-  final String? operationsSorter;
+  /// `null` preserves spec order.
+  final ScalarOperationsSorter? operationsSorter;
 
   // ── Visibility toggles ──────────────────────────────────────────────────────
 
@@ -393,8 +419,8 @@ class ScalarOptions {
       'showSidebar': showSidebar,
       'defaultOpenAllTags': defaultOpenAllTags,
       'defaultOpenFirstTag': defaultOpenFirstTag,
-      if (tagsSorter != null) 'tagsSorter': tagsSorter,
-      if (operationsSorter != null) 'operationsSorter': operationsSorter,
+      if (tagsSorter != null) 'tagsSorter': tagsSorter!.value,
+      if (operationsSorter != null) 'operationsSorter': operationsSorter!.value,
       // Visibility toggles
       'hideModels': hideModels,
       'hideSearch': hideSearch,

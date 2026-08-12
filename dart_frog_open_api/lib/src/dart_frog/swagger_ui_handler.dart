@@ -14,6 +14,23 @@ import '../security/security_config.dart';
 import '../security/security_guard.dart';
 import '../security/input_sanitizer.dart';
 
+/// How much of the document Swagger UI expands on first load.
+enum SwaggerDocExpansion {
+  /// Every section collapsed (fully minimized).
+  none('none'),
+
+  /// Tag groups expanded, operations collapsed.
+  list('list'),
+
+  /// Tag groups and operations expanded.
+  full('full');
+
+  const SwaggerDocExpansion(this.value);
+
+  /// The literal value passed to `SwaggerUIBundle({ docExpansion })`.
+  final String value;
+}
+
 /// Returns a Dart Frog [Handler] that serves the Swagger UI HTML page.
 ///
 /// The page loads Swagger UI from the official CDN and points it at
@@ -52,11 +69,9 @@ Handler swaggerUiHandler({
   Directory? brunoOutputDir,
   SecurityConfig security = const SecurityConfig(),
 
-  /// Controls how much of the document is expanded on first load:
-  /// - `'none'` → every section collapsed (fully minimized)
-  /// - `'list'` (default) → tag groups expanded, operations collapsed
-  /// - `'full'` → tag groups and operations expanded
-  String docExpansion = 'list',
+  /// Controls how much of the document is expanded on first load.
+  /// Defaults to [SwaggerDocExpansion.list].
+  SwaggerDocExpansion docExpansion = SwaggerDocExpansion.list,
 }) {
   final resolvedInfo = info;
   final postmanUrl = resolvedInfo != null ? '?format=postman' : null;
@@ -215,12 +230,9 @@ Response _serveBruno({
 // ---------------------------------------------------------------------------
 
 String _buildHtml(String specUrl, String? postmanUrl, String? brunoUrl,
-    {String title = 'API Docs', String docExpansion = 'list'}) {
+    {String title = 'API Docs',
+    SwaggerDocExpansion docExpansion = SwaggerDocExpansion.list}) {
   final buttons = _buildButtons(postmanUrl, brunoUrl);
-  final safeDocExpansion =
-      const {'none', 'list', 'full'}.contains(docExpansion)
-          ? docExpansion
-          : 'list';
 
   return '''
 <!DOCTYPE html>
@@ -249,7 +261,7 @@ String _buildHtml(String specUrl, String? postmanUrl, String? brunoUrl,
         layout: "BaseLayout",
         deepLinking: true,
         tryItOutEnabled: true,
-        docExpansion: "$safeDocExpansion",
+        docExpansion: "${docExpansion.value}",
         tagsSorter: "alpha",
         operationsSorter: "alpha",
       });
