@@ -195,6 +195,8 @@ class ScalarOptions {
     this.showSidebar = true,
     this.defaultOpenAllTags = false,
     this.defaultOpenFirstTag = true,
+    this.tagsSorter = 'alpha',
+    this.operationsSorter,
     // ── Visibility toggles ────────────────────────────────────────────────────
     this.hideModels = false,
     this.hideSearch = false,
@@ -266,6 +268,17 @@ class ScalarOptions {
 
   /// Auto-open the first tag group on load. Defaults to `true`.
   final bool defaultOpenFirstTag;
+
+  /// How the tag groups are ordered in the sidebar. `'alpha'` (default) sorts
+  /// them alphabetically; `null` preserves the order tags appear in the spec.
+  ///
+  /// Scalar does **not** honour the top-level `tags` array ordering on its own,
+  /// so this is what actually alphabetizes the sidebar groups.
+  final String? tagsSorter;
+
+  /// How the endpoints inside each tag group are ordered.
+  /// `'alpha'` (by summary) or `'method'`. `null` preserves spec order.
+  final String? operationsSorter;
 
   // ── Visibility toggles ──────────────────────────────────────────────────────
 
@@ -380,6 +393,8 @@ class ScalarOptions {
       'showSidebar': showSidebar,
       'defaultOpenAllTags': defaultOpenAllTags,
       'defaultOpenFirstTag': defaultOpenFirstTag,
+      if (tagsSorter != null) 'tagsSorter': tagsSorter,
+      if (operationsSorter != null) 'operationsSorter': operationsSorter,
       // Visibility toggles
       'hideModels': hideModels,
       'hideSearch': hideSearch,

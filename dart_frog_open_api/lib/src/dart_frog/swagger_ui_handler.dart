@@ -51,6 +51,12 @@ Handler swaggerUiHandler({
   /// this directory once at handler initialization. Omit to disable Bruno.
   Directory? brunoOutputDir,
   SecurityConfig security = const SecurityConfig(),
+
+  /// Controls how much of the document is expanded on first load:
+  /// - `'none'` → every section collapsed (fully minimized)
+  /// - `'list'` (default) → tag groups expanded, operations collapsed
+  /// - `'full'` → tag groups and operations expanded
+  String docExpansion = 'list',
 }) {
   final resolvedInfo = info;
   final postmanUrl = resolvedInfo != null ? '?format=postman' : null;
@@ -98,6 +104,7 @@ Handler swaggerUiHandler({
       postmanUrl,
       brunoUrl,
       title: InputSanitizer.escapeForHtml(info?.title ?? 'API Docs'),
+      docExpansion: docExpansion,
     );
 
     final secHeaders = SecurityGuard.securityResponseHeaders(security);
@@ -208,8 +215,12 @@ Response _serveBruno({
 // ---------------------------------------------------------------------------
 
 String _buildHtml(String specUrl, String? postmanUrl, String? brunoUrl,
-    {String title = 'API Docs'}) {
+    {String title = 'API Docs', String docExpansion = 'list'}) {
   final buttons = _buildButtons(postmanUrl, brunoUrl);
+  final safeDocExpansion =
+      const {'none', 'list', 'full'}.contains(docExpansion)
+          ? docExpansion
+          : 'list';
 
   return '''
 <!DOCTYPE html>
@@ -238,6 +249,9 @@ String _buildHtml(String specUrl, String? postmanUrl, String? brunoUrl,
         layout: "BaseLayout",
         deepLinking: true,
         tryItOutEnabled: true,
+        docExpansion: "$safeDocExpansion",
+        tagsSorter: "alpha",
+        operationsSorter: "alpha",
       });
     </script>
   </body>

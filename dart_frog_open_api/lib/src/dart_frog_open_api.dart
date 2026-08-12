@@ -93,7 +93,7 @@ class DartFrogOpenApi {
   ///
   /// Returns **404** when [SecurityConfig.enabled] is `false`.
   /// Returns **403** when the guard function denies the request.
-  Handler swaggerUiHandler() {
+  Handler swaggerUiHandler({String docExpansion = 'list'}) {
     return (RequestContext context) {
       final check = _checkAccess(context.request, config);
       if (check != null) return check;
@@ -108,6 +108,7 @@ class DartFrogOpenApi {
         baseUrl: config.baseUrl,
         brunoOutputDir: config.brunoOutputDir,
         security: config.security,
+        docExpansion: docExpansion,
       )(context);
     };
   }
